@@ -1,0 +1,34 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Private CodeMuscle data
+CodeMuscleData/
+imports/
+exports/
+backups/
+*.dump
+*.sql
+
+# Python
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+dist/
+
+# Node / Next.js
+node_modules/
+.pnpm-store/
+.next/
+coverage/
+playwright-report/
+test-results/
+
+# Editors
+.idea/
+.vscode/
