@@ -18,7 +18,7 @@ lint:
 	pnpm typecheck
 
 format:
-	uv run --project apps/api ruff format .
+	uv run --project apps/api ruff format apps/api/src apps/api/tests apps/api/alembic
 	pnpm --filter @codemuscle/web exec prettier --write .
 
 migrate:
@@ -33,4 +33,3 @@ e2e:
 build:
 	uv build --project apps/api
 	pnpm build
-

@@ -16,4 +16,3 @@ router = APIRouter(tags=["health"])
 async def health() -> HealthResponse:
     """Report process health without requiring external services."""
     return HealthResponse(status="ok", service="codemuscle-api")
-

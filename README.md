@@ -4,7 +4,9 @@ CodeMuscle is a private coding-interview revision tracker. Development follows t
 
 ## Current status
 
-Milestone 0 establishes the monorepo, FastAPI health endpoint, Next.js shell, PostgreSQL service, CI, and development tooling. Product data models and workflows begin in Milestone 1.
+Milestones 0 and 1 establish the monorepo, application shell, PostgreSQL service, private
+workspace initialization, persisted settings, core relational models, and the initial database
+migration. Problem-library workflows begin in Milestone 2.
 
 ## Prerequisites
 
@@ -37,4 +39,3 @@ Run quality checks with `make test`, `make lint`, and `make build`.
 ## Privacy
 
 Never place real imports, exports, backups, notes, database dumps, API keys, or a private workspace in this repository. The ignore rules cover common private-data paths, but the default workspace will live outside the repository.
-

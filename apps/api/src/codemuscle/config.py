@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import AnyHttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -14,11 +15,10 @@ class Settings(BaseSettings):
     api_port: int = 8000
     web_origin: AnyHttpUrl = AnyHttpUrl("http://localhost:3000")
     database_url: str = "postgresql+psycopg://codemuscle:codemuscle@localhost:5432/codemuscle"
-    workspace_path: str | None = None
+    workspace_path: Path | None = None
     ai_enabled: bool = False
 
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

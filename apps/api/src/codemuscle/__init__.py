@@ -1,2 +1,1 @@
 """CodeMuscle backend package."""
-
