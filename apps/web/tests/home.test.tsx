@@ -7,7 +7,8 @@ describe("HomePage", () => {
   it("states the primary product promise", () => {
     render(<HomePage />);
 
-    expect(screen.getByRole("heading", { name: /know what to revise today/i })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: /know what to revise today/i }),
+    ).toBeVisible();
   });
 });
-

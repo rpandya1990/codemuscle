@@ -8,11 +8,12 @@ export const metadata: Metadata = {
   description: "Build durable coding interview recall.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
       <body>{children}</body>
     </html>
   );
 }
-

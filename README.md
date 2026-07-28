@@ -4,9 +4,9 @@ CodeMuscle is a private coding-interview revision tracker. Development follows t
 
 ## Current status
 
-Milestones 0 and 1 establish the monorepo, application shell, PostgreSQL service, private
-workspace initialization, persisted settings, core relational models, and the initial database
-migration. Problem-library workflows begin in Milestone 2.
+Milestones 0–2 establish the monorepo, application shell, PostgreSQL service, private workspace,
+core relational models, and the problem library. Problems can be created, edited, searched,
+filtered, archived, restored, tagged with topics and patterns, and checked for duplicates.
 
 ## Prerequisites
 

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl items-center px-6 py-16">
@@ -9,13 +11,18 @@ export default function HomePage() {
           Know what to revise today.
         </h1>
         <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-          Your private, deterministic coding-interview revision tracker is taking shape.
+          Your private, deterministic coding-interview revision tracker is
+          taking shape.
         </p>
         <div className="mt-10 rounded-2xl bg-emerald-50 p-5 text-emerald-950">
-          Milestone 0 is ready. Workspace setup and the problem library are next.
+          <Link
+            href="/problems"
+            className="font-semibold underline underline-offset-4"
+          >
+            Open your problem library →
+          </Link>
         </div>
       </section>
     </main>
   );
 }
-
