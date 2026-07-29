@@ -74,3 +74,19 @@ def test_duplicate_row_can_be_explicitly_accepted(session: Session, tmp_path: Pa
     )
 
     assert result.imported == 1
+
+
+def test_suggested_mapping_recognizes_verified_csv_headers(
+    session: Session, tmp_path: Path
+) -> None:
+    service = ImportService(session, tmp_path)
+    uploaded = service.upload(
+        "verified.csv",
+        (
+            b"Problem title,Last revised date,Successful streak,Next revision date\n"
+            b"Two Sum,2026-04-27,5,2026-05-01\n"
+        ),
+    )
+
+    assert uploaded.mapping["last_revised_date"] == "Last revised date"
+    assert uploaded.mapping["successful_streak"] == "Successful streak"

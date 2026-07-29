@@ -35,8 +35,12 @@ async function json<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as {
       error?: { message?: string };
+      detail?: string;
     } | null;
-    throw new Error(body?.error?.message ?? "The import request failed.");
+    const message = body?.error?.message ?? body?.detail;
+    throw new Error(
+      message ?? `The import request failed (HTTP ${response.status}). Check the API logs.`,
+    );
   }
   return response.json() as Promise<T>;
 }

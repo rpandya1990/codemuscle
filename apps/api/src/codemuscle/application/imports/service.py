@@ -26,11 +26,17 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
     "notes": ("notes",),
     "topic": ("topic", "topics"),
     "pattern": ("pattern", "patterns"),
-    "last_revised_date": ("last revised or solved date", "last revised", "last solved date"),
+    "last_revised_date": (
+        "last revised or solved date",
+        "last revised date",
+        "last revised",
+        "last solved date",
+    ),
     "revision_count": ("number of revisions", "revision count"),
     "successful_streak": (
         "number of successful continuous revisions",
         "successful revision streak",
+        "successful streak",
     ),
     "next_revision_date": ("next revision date",),
 }
