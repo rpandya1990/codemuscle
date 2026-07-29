@@ -28,14 +28,21 @@ def test_problem_api_create_list_and_not_found_error() -> None:
         client = TestClient(app)
         created = client.post(
             "/api/v1/problems",
-            json={"title": "Binary Search", "difficulty": "EASY", "topics": ["Binary Search"]},
+            json={
+                "title": "Binary Search",
+                "url": "https://leetcode.com/problems/binary-search/",
+                "difficulty": "EASY",
+                "topics": ["Binary Search"],
+            },
         )
+        missing_url = client.post("/api/v1/problems", json={"title": "Missing link"})
         listed = client.get("/api/v1/problems", params={"search": "binary"})
         missing = client.get("/api/v1/problems/00000000-0000-0000-0000-000000000000")
     finally:
         app.dependency_overrides.clear()
 
     assert created.status_code == 201
+    assert missing_url.status_code == 422
     assert listed.json()["total"] == 1
     assert missing.status_code == 404
     assert missing.json()["error"]["code"] == "PROBLEM_NOT_FOUND"

@@ -50,7 +50,13 @@ export async function fetchProblems(
 
 export async function updateProblem(
   problemId: string,
-  input: { title: string },
+  input: {
+    title: string;
+    url: string;
+    difficulty: Difficulty;
+    notes: string | null;
+    patterns: string[];
+  },
 ): Promise<Problem> {
   const response = await fetch(`${API_URL}/problems/${problemId}`, {
     method: "PATCH",
@@ -63,8 +69,11 @@ export async function updateProblem(
 
 export async function createProblem(input: {
   title: string;
+  url: string;
   difficulty: Difficulty;
+  notes?: string;
   topics: string[];
+  patterns: string[];
 }): Promise<Problem> {
   const response = await fetch(`${API_URL}/problems`, {
     method: "POST",

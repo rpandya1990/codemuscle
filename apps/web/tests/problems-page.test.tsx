@@ -20,6 +20,9 @@ describe("ProblemsPage", () => {
       screen.getByRole("heading", { name: "Coding problems" }),
     ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Add problem" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Problem link" })).toBeRequired();
+    expect(screen.getByRole("textbox", { name: /Notes/ })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: /Patterns/ })).toBeVisible();
     expect(
       screen.getByRole("searchbox", { name: "Search problems" }),
     ).toBeVisible();

@@ -2,6 +2,7 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from pydantic import HttpUrl
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
@@ -25,15 +26,17 @@ def session() -> Iterator[Session]:
 
 
 def test_preview_partial_commit_retry_and_traceability(session: Session, tmp_path: Path) -> None:
-    ProblemService(session).create(ProblemCreate(title="Two Sum"))
+    ProblemService(session).create(
+        ProblemCreate(title="Two Sum", url=HttpUrl("https://leetcode.com/problems/two-sum/"))
+    )
     service = ImportService(session, tmp_path)
     uploaded = service.upload(
         "history.csv",
         (
-            b"Problem Title,Difficulty,Topic,Number of Revisions\n"
-            b"Binary Search,Easy,Searching,3\n"
-            b"Two Sum,Easy,Arrays,2\n"
-            b",Hard,Graphs,1\n"
+            b"Problem Title,Problem Link,Difficulty,Topic,Number of Revisions\n"
+            b"Binary Search,https://example.com/binary-search,Easy,Searching,3\n"
+            b"Two Sum,https://leetcode.com/problems/two-sum/,Easy,Arrays,2\n"
+            b",https://example.com/course-schedule,Hard,Graphs,1\n"
         ),
     )
 
@@ -62,9 +65,13 @@ def test_preview_partial_commit_retry_and_traceability(session: Session, tmp_pat
 
 
 def test_duplicate_row_can_be_explicitly_accepted(session: Session, tmp_path: Path) -> None:
-    ProblemService(session).create(ProblemCreate(title="Two Sum"))
+    ProblemService(session).create(
+        ProblemCreate(title="Two Sum", url=HttpUrl("https://leetcode.com/problems/two-sum/"))
+    )
     service = ImportService(session, tmp_path)
-    uploaded = service.upload("one.csv", b"Problem Title\nTwo Sum\n")
+    uploaded = service.upload(
+        "one.csv", b"Problem Title,Problem Link\nTwo Sum,https://leetcode.com/problems/two-sum/\n"
+    )
     preview = service.preview(uploaded.id)
     duplicate = preview.rows[0]
 
@@ -83,8 +90,8 @@ def test_suggested_mapping_recognizes_verified_csv_headers(
     uploaded = service.upload(
         "verified.csv",
         (
-            b"Problem title,Last revised date,Successful streak,Next revision date\n"
-            b"Two Sum,2026-04-27,5,2026-05-01\n"
+            b"Problem title,Problem link,Last revised date,Successful streak,Next revision date\n"
+            b"Two Sum,https://example.com/two-sum,2026-04-27,5,2026-05-01\n"
         ),
     )
 

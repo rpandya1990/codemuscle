@@ -21,6 +21,7 @@ export function ProblemLibrary() {
   const [error, setError] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [editing, setEditing] = useState<Problem | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -55,10 +56,16 @@ export function ProblemLibrary() {
     try {
       await createProblem({
         title,
+        url: String(form.get("url") ?? "").trim(),
         difficulty: String(form.get("difficulty")) as Difficulty,
+        notes: String(form.get("notes") ?? "").trim() || undefined,
         topics: String(form.get("topics") ?? "")
           .split(",")
           .map((topic) => topic.trim())
+          .filter(Boolean),
+        patterns: String(form.get("patterns") ?? "")
+          .split(",")
+          .map((pattern) => pattern.trim())
           .filter(Boolean),
       });
       event.currentTarget.reset();
@@ -96,11 +103,23 @@ export function ProblemLibrary() {
     }
   }
 
-  async function editProblem(problem: Problem) {
-    const title = window.prompt("Problem title", problem.title)?.trim();
-    if (!title || title === problem.title) return;
+  async function editProblem(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editing) return;
+    const form = new FormData(event.currentTarget);
+    setSubmitting(true);
     try {
-      await updateProblem(problem.id, { title });
+      await updateProblem(editing.id, {
+        title: String(form.get("title") ?? "").trim(),
+        url: String(form.get("url") ?? "").trim(),
+        difficulty: String(form.get("difficulty")) as Difficulty,
+        notes: String(form.get("notes") ?? "").trim() || null,
+        patterns: String(form.get("patterns") ?? "")
+          .split(",")
+          .map((pattern) => pattern.trim())
+          .filter(Boolean),
+      });
+      setEditing(null);
       await load();
     } catch (reason) {
       setError(
@@ -108,6 +127,8 @@ export function ProblemLibrary() {
           ? reason.message
           : "Could not edit the problem.",
       );
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -188,7 +209,7 @@ export function ProblemLibrary() {
                     <button
                       type="button"
                       className="btn-quiet"
-                      onClick={() => void editProblem(problem)}
+                      onClick={() => setEditing(problem)}
                     >
                       Edit
                     </button>
@@ -252,6 +273,16 @@ export function ProblemLibrary() {
             </p>
           )}
           <label className="field-label">
+            Problem link
+            <input
+              required
+              type="url"
+              name="url"
+              placeholder="https://leetcode.com/problems/merge-intervals"
+              className="field-control"
+            />
+          </label>
+          <label className="field-label">
             Difficulty
             <select
               name="difficulty"
@@ -265,6 +296,15 @@ export function ProblemLibrary() {
             </select>
           </label>
           <label className="field-label">
+            Notes <span className="font-normal text-slate-400">(optional)</span>
+            <textarea
+              name="notes"
+              rows={4}
+              placeholder="Key insight, edge cases, or reminders"
+              className="field-control resize-y"
+            />
+          </label>
+          <label className="field-label">
             Topics
             <input
               name="topics"
@@ -275,11 +315,86 @@ export function ProblemLibrary() {
               Separate multiple topics with commas.
             </span>
           </label>
+          <label className="field-label">
+            Patterns <span className="font-normal text-slate-400">(optional)</span>
+            <input
+              name="patterns"
+              placeholder="Sliding Window, Two Pointers"
+              className="field-control"
+            />
+            <span className="mt-2 block text-xs font-normal text-slate-400">
+              Separate multiple patterns with commas.
+            </span>
+          </label>
           <button disabled={submitting} className="btn-primary w-full">
             {submitting ? "Adding problem…" : "Add to library"}
           </button>
         </form>
       </aside>
+
+      {editing && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setEditing(null);
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-problem-title"
+            className="surface-card max-h-[90vh] w-full max-w-xl overflow-y-auto p-6 shadow-2xl"
+          >
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <h2 id="edit-problem-title" className="text-xl font-semibold">
+                  Edit problem
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Update the problem details used in your library.
+                </p>
+              </div>
+              <button className="btn-quiet" type="button" onClick={() => setEditing(null)}>
+                Close
+              </button>
+            </div>
+            <form className="space-y-5" onSubmit={(event) => void editProblem(event)}>
+              <label className="field-label">
+                Title
+                <input required name="title" defaultValue={editing.title} className="field-control" />
+              </label>
+              <label className="field-label">
+                Problem link
+                <input required type="url" name="url" defaultValue={editing.url ?? ""} className="field-control" />
+              </label>
+              <label className="field-label">
+                Difficulty
+                <select name="difficulty" defaultValue={editing.difficulty} className="field-control">
+                  <option value="UNKNOWN">Unknown</option>
+                  <option value="EASY">Easy</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HARD">Hard</option>
+                </select>
+              </label>
+              <label className="field-label">
+                Notes <span className="font-normal text-slate-400">(optional)</span>
+                <textarea name="notes" rows={5} defaultValue={editing.notes ?? ""} className="field-control resize-y" />
+              </label>
+              <label className="field-label">
+                Patterns <span className="font-normal text-slate-400">(optional)</span>
+                <input name="patterns" defaultValue={editing.patterns.map((pattern) => pattern.name).join(", ")} className="field-control" />
+              </label>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" className="btn-quiet" onClick={() => setEditing(null)}>Cancel</button>
+                <button disabled={submitting} className="btn-primary">
+                  {submitting ? "Saving…" : "Save changes"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

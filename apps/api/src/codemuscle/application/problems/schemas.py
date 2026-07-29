@@ -17,7 +17,7 @@ class ProblemCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str = Field(min_length=1, max_length=500)
-    url: HttpUrl | None = None
+    url: HttpUrl
     platform: str | None = Field(default=None, max_length=100)
     platform_identifier: str | None = Field(default=None, max_length=255)
     difficulty: Difficulty = Difficulty.UNKNOWN
