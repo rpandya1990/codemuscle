@@ -1,4 +1,19 @@
-.PHONY: setup dev test lint format migrate seed e2e build
+.PHONY: start stop restart status logs setup dev test lint format migrate seed e2e build
+
+start:
+	./scripts/codemuscle start
+
+stop:
+	./scripts/codemuscle stop
+
+restart:
+	./scripts/codemuscle restart
+
+status:
+	./scripts/codemuscle status
+
+logs:
+	./scripts/codemuscle logs
 
 setup:
 	uv sync --project apps/api --all-groups
@@ -22,7 +37,7 @@ format:
 	pnpm --filter @codemuscle/web exec prettier --write .
 
 migrate:
-	uv run --project apps/api alembic upgrade head
+	uv run --project apps/api alembic -c apps/api/alembic.ini upgrade head
 
 seed:
 	@echo "Fictional seed data will be added with Milestone 1."

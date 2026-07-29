@@ -16,20 +16,41 @@ duplicate review, partial commits, correction retries, and legacy-summary preser
 - Node.js (current LTS)
 - `pnpm`
 
-## Run with Docker
+## Quick start
 
 ```bash
-cp .env.example .env
-docker compose up --build
+make start
 ```
 
-Open the web app at <http://localhost:3000> and API documentation at <http://localhost:8000/docs>.
+This installs the backend tooling, starts PostgreSQL, applies migrations, builds the application,
+and initializes a private workspace at `~/CodeMuscleData`.
+
+Open the web app at <http://localhost:3000> and API documentation at
+<http://localhost:8000/docs>.
+
+Use the lifecycle commands:
+
+```bash
+make status
+make logs
+make restart
+make stop
+```
+
+To store private files somewhere else on first start:
+
+```bash
+CODEMUSCLE_WORKSPACE_PATH=/absolute/private/path make start
+```
+
+`make stop` preserves both the PostgreSQL Docker volume and private workspace files.
 
 ## Run locally
 
 ```bash
 make setup
 docker compose up -d postgres
+make migrate
 uv run --project apps/api uvicorn codemuscle.main:app --reload --host 127.0.0.1 --port 8000
 pnpm dev
 ```
