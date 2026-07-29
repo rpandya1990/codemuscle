@@ -18,6 +18,11 @@ vi.mock("../lib/problems", () => ({
   updateProblem: vi.fn(),
 }));
 
+vi.mock("../lib/attempts", () => ({
+  createAttempt: vi.fn(),
+  fetchAttempts: vi.fn().mockResolvedValue([]),
+}));
+
 describe("ProblemsPage", () => {
   it("renders library controls", async () => {
     render(<ProblemsPage />);
@@ -64,6 +69,8 @@ describe("ProblemsPage", () => {
         difficulty: "UNKNOWN" as const,
         notes: null,
         priority: 3,
+        total_attempts: 0,
+        successful_revision_streak: 0,
         current_mastery_state: "NEW",
         archived_at: null,
         topics: [],
@@ -77,6 +84,13 @@ describe("ProblemsPage", () => {
     render(<ProblemsPage />);
     expect(await screen.findByText("Showing 1–25 of 26")).toBeVisible();
     expect(screen.queryByText("Problem 26")).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Record attempt" })[0],
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Record attempt" }),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
 

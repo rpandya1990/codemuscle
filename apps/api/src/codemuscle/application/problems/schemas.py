@@ -54,6 +54,8 @@ class ProblemResponse(BaseModel):
     difficulty: Difficulty
     notes: str | None
     priority: int
+    total_attempts: int
+    successful_revision_streak: int
     date_added: date
     current_mastery_state: MasteryState
     next_revision_date: date | None

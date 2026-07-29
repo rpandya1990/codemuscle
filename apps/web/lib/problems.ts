@@ -13,6 +13,8 @@ export interface Problem {
   difficulty: Difficulty;
   notes: string | null;
   priority: number;
+  total_attempts: number;
+  successful_revision_streak: number;
   current_mastery_state: string;
   archived_at: string | null;
   topics: NamedReference[];

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from codemuscle.api.routes.attempts import router as attempts_router
 from codemuscle.api.routes.health import router as health_router
 from codemuscle.api.routes.imports import router as imports_router
 from codemuscle.api.routes.problems import router as problems_router
@@ -7,6 +8,7 @@ from codemuscle.api.routes.settings import router as settings_router
 from codemuscle.api.routes.workspace import router as workspace_router
 
 api_router = APIRouter(prefix="/api/v1")
+api_router.include_router(attempts_router)
 api_router.include_router(health_router)
 api_router.include_router(imports_router)
 api_router.include_router(problems_router)

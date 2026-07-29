@@ -38,6 +38,15 @@ def test_problem_api_create_list_and_not_found_error() -> None:
         missing_url = client.post("/api/v1/problems", json={"title": "Missing link"})
         listed = client.get("/api/v1/problems", params={"search": "binary", "page_size": 5000})
         topics = client.get("/api/v1/problems/topics")
+        attempt = client.post(
+            f"/api/v1/problems/{created.json()['id']}/attempts",
+            json={
+                "outcome": "SOLVED_INDEPENDENTLY",
+                "hint_usage": "NONE",
+                "confidence": 4,
+            },
+        )
+        history = client.get(f"/api/v1/problems/{created.json()['id']}/attempts")
         missing = client.get("/api/v1/problems/00000000-0000-0000-0000-000000000000")
     finally:
         app.dependency_overrides.clear()
@@ -47,5 +56,7 @@ def test_problem_api_create_list_and_not_found_error() -> None:
     assert listed.json()["total"] == 1
     assert topics.status_code == 200
     assert topics.json() == [{"id": created.json()["topics"][0]["id"], "name": "Binary Search"}]
+    assert attempt.status_code == 201
+    assert history.json()[0]["id"] == attempt.json()["id"]
     assert missing.status_code == 404
     assert missing.json()["error"]["code"] == "PROBLEM_NOT_FOUND"

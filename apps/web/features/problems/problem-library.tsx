@@ -3,6 +3,14 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
 import {
+  Attempt,
+  AttemptOutcome,
+  createAttempt,
+  fetchAttempts,
+  HintUsage,
+} from "@/lib/attempts";
+
+import {
   createProblem,
   Difficulty,
   fetchProblems,
@@ -28,6 +36,8 @@ export function ProblemLibrary() {
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [editing, setEditing] = useState<Problem | null>(null);
+  const [attemptProblem, setAttemptProblem] = useState<Problem | null>(null);
+  const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [page, setPage] = useState(1);
   const totalPages = Math.max(
     1,
@@ -164,6 +174,56 @@ export function ProblemLibrary() {
     }
   }
 
+  async function openAttempts(problem: Problem) {
+    setAttemptProblem(problem);
+    try {
+      setAttempts(await fetchAttempts(problem.id));
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "Could not load attempt history.",
+      );
+    }
+  }
+
+  async function recordAttempt(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!attemptProblem) return;
+    const form = new FormData(event.currentTarget);
+    const complexityUnderstood = String(
+      form.get("complexity_understood") ?? "",
+    );
+    setSubmitting(true);
+    try {
+      await createAttempt(attemptProblem.id, {
+        outcome: String(form.get("outcome")) as AttemptOutcome,
+        hint_usage: String(form.get("hint_usage")) as HintUsage,
+        time_spent_minutes: form.get("time_spent_minutes")
+          ? Number(form.get("time_spent_minutes"))
+          : null,
+        confidence: form.get("confidence")
+          ? Number(form.get("confidence"))
+          : null,
+        notes: String(form.get("notes") ?? "").trim() || null,
+        complexity_understood: complexityUnderstood
+          ? complexityUnderstood === "yes"
+          : null,
+      });
+      event.currentTarget.reset();
+      setAttempts(await fetchAttempts(attemptProblem.id));
+      await load();
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "Could not record the attempt.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_23rem]">
       <section>
@@ -258,10 +318,18 @@ export function ProblemLibrary() {
                         {problem.title}
                       </h2>
                       <p className="mt-1 text-sm text-slate-500">
-                        {problem.difficulty} · Priority {problem.priority}
+                        {problem.difficulty} · {problem.current_mastery_state} ·{" "}
+                        {problem.total_attempts} attempts
                       </p>
                     </div>
                     <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => void openAttempts(problem)}
+                      >
+                        Record attempt
+                      </button>
                       <button
                         type="button"
                         className="btn-quiet"
@@ -528,6 +596,156 @@ export function ProblemLibrary() {
                 </button>
               </div>
             </form>
+          </section>
+        </div>
+      )}
+
+      {attemptProblem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="attempt-title"
+            className="surface-card max-h-[92vh] w-full max-w-3xl overflow-y-auto p-6 shadow-2xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="attempt-title" className="text-xl font-semibold">
+                  Record attempt
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {attemptProblem.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn-quiet"
+                onClick={() => setAttemptProblem(null)}
+              >
+                Close
+              </button>
+            </div>
+            <form
+              className="mt-6 grid gap-5 sm:grid-cols-2"
+              onSubmit={(event) => void recordAttempt(event)}
+            >
+              <label className="field-label">
+                Outcome
+                <select
+                  name="outcome"
+                  className="field-control"
+                  defaultValue="SOLVED_INDEPENDENTLY"
+                >
+                  <option value="SOLVED_INDEPENDENTLY">
+                    Solved independently
+                  </option>
+                  <option value="SOLVED_SMALL_HINT">
+                    Solved with small hint
+                  </option>
+                  <option value="SOLVED_SIGNIFICANT_HELP">
+                    Solved with significant help
+                  </option>
+                  <option value="UNDERSTOOD_AFTER_SOLUTION">
+                    Understood after solution
+                  </option>
+                  <option value="FAILED">Failed</option>
+                  <option value="SKIPPED">Skipped</option>
+                </select>
+              </label>
+              <label className="field-label">
+                Hint usage
+                <select
+                  name="hint_usage"
+                  className="field-control"
+                  defaultValue="NONE"
+                >
+                  <option value="NONE">None</option>
+                  <option value="SMALL">Small</option>
+                  <option value="SIGNIFICANT">Significant</option>
+                  <option value="SOLUTION_VIEWED">Solution viewed</option>
+                  <option value="NOT_APPLICABLE">Not applicable</option>
+                </select>
+              </label>
+              <label className="field-label">
+                Time spent (minutes)
+                <input
+                  type="number"
+                  min="0"
+                  max="1440"
+                  name="time_spent_minutes"
+                  className="field-control"
+                />
+              </label>
+              <label className="field-label">
+                Confidence (1–5)
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  name="confidence"
+                  className="field-control"
+                />
+              </label>
+              <label className="field-label">
+                Complexity understood
+                <select
+                  name="complexity_understood"
+                  className="field-control"
+                  defaultValue=""
+                >
+                  <option value="">Not recorded</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </label>
+              <label className="field-label sm:col-span-2">
+                Notes
+                <textarea
+                  name="notes"
+                  rows={3}
+                  className="field-control resize-y"
+                />
+              </label>
+              <button
+                disabled={submitting}
+                className="btn-primary sm:col-span-2"
+              >
+                {submitting ? "Recording…" : "Record attempt"}
+              </button>
+            </form>
+            <div className="mt-8 border-t border-slate-200 pt-6">
+              <h3 className="font-semibold">Attempt history</h3>
+              {attempts.length === 0 ? (
+                <p className="mt-3 text-sm text-slate-500">
+                  No attempts recorded yet.
+                </p>
+              ) : (
+                <ol className="mt-3 space-y-3">
+                  {attempts.map((attempt) => (
+                    <li
+                      key={attempt.id}
+                      className="rounded-xl border border-slate-200 p-4"
+                    >
+                      <div className="flex flex-wrap justify-between gap-2 text-sm">
+                        <strong>{attempt.outcome.replaceAll("_", " ")}</strong>
+                        <time className="text-slate-500">
+                          {new Date(attempt.attempted_at).toLocaleString()}
+                        </time>
+                      </div>
+                      <p className="mt-2 text-sm text-slate-600">
+                        {attempt.previous_mastery_state} →{" "}
+                        {attempt.calculated_mastery_state}
+                      </p>
+                      {attempt.notes && (
+                        <p className="mt-2 text-sm text-slate-700">
+                          {attempt.notes}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
           </section>
         </div>
       )}
