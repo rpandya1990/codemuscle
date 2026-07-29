@@ -328,8 +328,8 @@ export function ProblemLibrary() {
         )}
       </section>
 
-      <aside className="surface-card h-fit overflow-hidden lg:sticky lg:top-8">
-        <div className="border-b border-slate-100 bg-gradient-to-br from-emerald-50 to-white px-6 py-5">
+      <aside className="surface-card h-fit overflow-hidden lg:sticky lg:top-8 lg:flex lg:max-h-[calc(100vh-4rem)] lg:flex-col">
+        <div className="shrink-0 border-b border-slate-100 bg-gradient-to-br from-emerald-50 to-white px-6 py-5">
           <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-700 text-xl text-white shadow-sm">
             ＋
           </div>
@@ -341,85 +341,90 @@ export function ProblemLibrary() {
           </p>
         </div>
         <form
-          className="space-y-5 p-6"
+          className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
           onSubmit={(event) => void addProblem(event)}
         >
-          <label className="field-label">
-            Title
-            <input
-              required
-              name="title"
-              onBlur={(event) => void checkDuplicates(event.target.value)}
-              placeholder="e.g. Merge Intervals"
-              className="field-control"
-            />
-          </label>
-          {duplicateWarning && (
-            <p
-              role="status"
-              className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900"
-            >
-              {duplicateWarning}. You can still keep both records.
-            </p>
-          )}
-          <label className="field-label">
-            Problem link{" "}
-            <span className="font-normal text-slate-400">(optional)</span>
-            <input
-              type="url"
-              name="url"
-              placeholder="https://leetcode.com/problems/merge-intervals"
-              className="field-control"
-            />
-          </label>
-          <label className="field-label">
-            Difficulty
-            <select
-              name="difficulty"
-              defaultValue="UNKNOWN"
-              className="field-control"
-            >
-              <option>UNKNOWN</option>
-              <option>EASY</option>
-              <option>MEDIUM</option>
-              <option>HARD</option>
-            </select>
-          </label>
-          <label className="field-label">
-            Notes <span className="font-normal text-slate-400">(optional)</span>
-            <textarea
-              name="notes"
-              rows={4}
-              placeholder="Key insight, edge cases, or reminders"
-              className="field-control resize-y"
-            />
-          </label>
-          <label className="field-label">
-            Topics
-            <input
-              name="topics"
-              placeholder="Arrays, Hash Table"
-              className="field-control"
-            />
-            <span className="mt-2 block text-xs font-normal text-slate-400">
-              Separate multiple topics with commas.
-            </span>
-          </label>
-          <label className="field-label">
-            Patterns{" "}
-            <span className="font-normal text-slate-400">(optional)</span>
-            <input
-              name="patterns"
-              placeholder="Sliding Window, Two Pointers"
-              className="field-control"
-            />
-            <span className="mt-2 block text-xs font-normal text-slate-400">
-              Separate multiple patterns with commas.
-            </span>
-          </label>
-          <button disabled={submitting} className="btn-primary w-full">
-            {submitting ? "Adding problem…" : "Add to library"}
-          </button>
+          <div className="space-y-5 p-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+            <label className="field-label">
+              Title
+              <input
+                required
+                name="title"
+                onBlur={(event) => void checkDuplicates(event.target.value)}
+                placeholder="e.g. Merge Intervals"
+                className="field-control"
+              />
+            </label>
+            {duplicateWarning && (
+              <p
+                role="status"
+                className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900"
+              >
+                {duplicateWarning}. You can still keep both records.
+              </p>
+            )}
+            <label className="field-label">
+              Problem link{" "}
+              <span className="font-normal text-slate-400">(optional)</span>
+              <input
+                type="url"
+                name="url"
+                placeholder="https://leetcode.com/problems/merge-intervals"
+                className="field-control"
+              />
+            </label>
+            <label className="field-label">
+              Difficulty
+              <select
+                name="difficulty"
+                defaultValue="UNKNOWN"
+                className="field-control"
+              >
+                <option>UNKNOWN</option>
+                <option>EASY</option>
+                <option>MEDIUM</option>
+                <option>HARD</option>
+              </select>
+            </label>
+            <label className="field-label">
+              Notes{" "}
+              <span className="font-normal text-slate-400">(optional)</span>
+              <textarea
+                name="notes"
+                rows={4}
+                placeholder="Key insight, edge cases, or reminders"
+                className="field-control resize-y"
+              />
+            </label>
+            <label className="field-label">
+              Topics
+              <input
+                name="topics"
+                placeholder="Arrays, Hash Table"
+                className="field-control"
+              />
+              <span className="mt-2 block text-xs font-normal text-slate-400">
+                Separate multiple topics with commas.
+              </span>
+            </label>
+            <label className="field-label">
+              Patterns{" "}
+              <span className="font-normal text-slate-400">(optional)</span>
+              <input
+                name="patterns"
+                placeholder="Sliding Window, Two Pointers"
+                className="field-control"
+              />
+              <span className="mt-2 block text-xs font-normal text-slate-400">
+                Separate multiple patterns with commas.
+              </span>
+            </label>
+          </div>
+          <div className="shrink-0 border-t border-slate-100 bg-white p-4">
+            <button disabled={submitting} className="btn-primary w-full">
+              {submitting ? "Adding problem…" : "Add to library"}
+            </button>
+          </div>
         </form>
       </aside>
 

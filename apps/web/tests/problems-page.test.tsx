@@ -26,6 +26,9 @@ describe("ProblemsPage", () => {
     ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Add problem" })).toBeVisible();
     expect(
+      screen.getByRole("button", { name: "Add to library" }),
+    ).toBeVisible();
+    expect(
       screen.getByRole("textbox", { name: /Problem link/ }),
     ).not.toBeRequired();
     expect(screen.getByRole("textbox", { name: /Notes/ })).toBeVisible();
