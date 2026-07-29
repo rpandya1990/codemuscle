@@ -9,12 +9,14 @@ vi.mock("../lib/problems", () => ({
     .fn()
     .mockResolvedValue({ items: [], total: 0, page: 1, page_size: 25 }),
   createProblem: vi.fn(),
+  clearScheduleOverride: vi.fn(),
   fetchTopics: vi.fn().mockResolvedValue([
     { id: "arrays", name: "Arrays" },
     { id: "graphs", name: "Graphs" },
   ]),
   findDuplicates: vi.fn().mockResolvedValue([]),
   setProblemArchived: vi.fn(),
+  setScheduleOverride: vi.fn(),
   updateProblem: vi.fn(),
 }));
 
@@ -71,6 +73,9 @@ describe("ProblemsPage", () => {
         priority: 3,
         total_attempts: 0,
         successful_revision_streak: 0,
+        next_revision_date: null,
+        calculated_next_revision_date: null,
+        next_revision_overridden: false,
         current_mastery_state: "NEW",
         archived_at: null,
         topics: [],

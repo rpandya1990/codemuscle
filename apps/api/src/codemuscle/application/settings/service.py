@@ -26,6 +26,9 @@ class SettingsService:
             web_origin=str(self.runtime_settings.web_origin).rstrip("/"),
             default_available_minutes=(preference.default_available_minutes if preference else 60),
             timezone=preference.timezone if preference else "UTC",
+            successful_intervals=(
+                preference.successful_intervals if preference else [1, 3, 7, 14, 30, 60]
+            ),
         )
 
     def update(self, request: SettingsUpdateRequest) -> SettingsResponse:

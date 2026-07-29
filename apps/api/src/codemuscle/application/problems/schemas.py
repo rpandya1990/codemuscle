@@ -56,6 +56,9 @@ class ProblemResponse(BaseModel):
     priority: int
     total_attempts: int
     successful_revision_streak: int
+    next_revision_date: date | None
+    calculated_next_revision_date: date | None
+    next_revision_overridden: bool
     date_added: date
     current_mastery_state: MasteryState
     next_revision_date: date | None

@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
@@ -9,9 +9,12 @@ from codemuscle.application.attempts.schemas import (
     AttemptResponse,
     RecentAttemptResponse,
 )
-from codemuscle.domain.enums import AttemptOutcome, MasteryState
+from codemuscle.application.scheduling.policy import (
+    DEFAULT_SUCCESS_INTERVALS,
+    calculate_schedule,
+)
 from codemuscle.domain.exceptions import ProblemNotFoundError
-from codemuscle.infrastructure.database.models import Attempt, Problem
+from codemuscle.infrastructure.database.models import Attempt, Problem, UserPreference
 
 
 class AttemptService:
@@ -23,10 +26,20 @@ class AttemptService:
         if problem is None:
             raise ProblemNotFoundError(problem_id)
         attempted_at = data.attempted_at or datetime.now(UTC)
-        mastery, streak = self._calculate_mastery(
-            problem.current_mastery_state, problem.successful_revision_streak, data.outcome
+        preference = self.session.scalar(select(UserPreference).limit(1))
+        schedule = calculate_schedule(
+            attempted_on=attempted_at.date(),
+            outcome=data.outcome,
+            hint_usage=data.hint_usage,
+            previous_mastery=problem.current_mastery_state,
+            successful_streak=problem.successful_revision_streak,
+            difficulty=problem.difficulty,
+            confidence=data.confidence,
+            priority=problem.priority,
+            intervals=(
+                preference.successful_intervals if preference else DEFAULT_SUCCESS_INTERVALS
+            ),
         )
-        next_revision = attempted_at.date() + timedelta(days=1)
         attempt = Attempt(
             problem_id=problem.id,
             attempted_at=attempted_at,
@@ -37,19 +50,17 @@ class AttemptService:
             notes=data.notes or None,
             complexity_understood=data.complexity_understood,
             previous_mastery_state=problem.current_mastery_state,
-            calculated_mastery_state=mastery,
+            calculated_mastery_state=schedule.mastery_state,
             previous_revision_date=problem.next_revision_date,
-            calculated_next_revision_date=next_revision,
-            schedule_explanation=(
-                "Initial follow-up in 1 day; interval scheduling is configured in Milestone 5."
-            ),
+            calculated_next_revision_date=schedule.next_revision_date,
+            schedule_explanation=schedule.explanation,
         )
         self.session.add(attempt)
         problem.total_attempts += 1
-        problem.successful_revision_streak = streak
-        problem.current_mastery_state = mastery
-        problem.calculated_next_revision_date = next_revision
-        problem.next_revision_date = next_revision
+        problem.successful_revision_streak = schedule.successful_revision_streak
+        problem.current_mastery_state = schedule.mastery_state
+        problem.calculated_next_revision_date = schedule.next_revision_date
+        problem.next_revision_date = schedule.next_revision_date
         problem.next_revision_overridden = False
         self.session.commit()
         self.session.refresh(attempt)
@@ -79,25 +90,3 @@ class AttemptService:
             )
             for attempt in attempts
         ]
-
-    @staticmethod
-    def _calculate_mastery(
-        previous: MasteryState, streak: int, outcome: AttemptOutcome
-    ) -> tuple[MasteryState, int]:
-        if outcome == AttemptOutcome.FAILED:
-            return MasteryState.NEEDS_RELEARNING, 0
-        if outcome in {
-            AttemptOutcome.UNDERSTOOD_AFTER_SOLUTION,
-            AttemptOutcome.SOLVED_SIGNIFICANT_HELP,
-        }:
-            return MasteryState.LEARNING, 0
-        if outcome == AttemptOutcome.SKIPPED:
-            return previous, streak
-        new_streak = streak + 1
-        if outcome == AttemptOutcome.SOLVED_SMALL_HINT:
-            return MasteryState.FRAGILE, new_streak
-        if new_streak >= 4:
-            return MasteryState.MASTERED, new_streak
-        if new_streak >= 2:
-            return MasteryState.RETAINED, new_streak
-        return MasteryState.LEARNING, new_streak

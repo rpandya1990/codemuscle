@@ -21,6 +21,7 @@ export interface Attempt {
   complexity_understood: boolean | null;
   previous_mastery_state: string;
   calculated_mastery_state: string;
+  calculated_next_revision_date: string;
   schedule_explanation: string;
   created_at: string;
 }

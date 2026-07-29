@@ -15,6 +15,9 @@ export interface Problem {
   priority: number;
   total_attempts: number;
   successful_revision_streak: number;
+  next_revision_date: string | null;
+  calculated_next_revision_date: string | null;
+  next_revision_overridden: boolean;
   current_mastery_state: string;
   archived_at: string | null;
   topics: NamedReference[];
@@ -116,4 +119,34 @@ export async function setProblemArchived(
     method: "POST",
   });
   if (!response.ok) throw new Error(`Could not ${action} the problem.`);
+}
+
+export async function setScheduleOverride(
+  problemId: string,
+  nextRevisionDate: string,
+): Promise<Problem> {
+  const response = await fetch(
+    `${API_URL}/problems/${problemId}/schedule-override`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ next_revision_date: nextRevisionDate }),
+    },
+  );
+  if (!response.ok) throw new Error("Could not override the revision date.");
+  return response.json() as Promise<Problem>;
+}
+
+export async function clearScheduleOverride(
+  problemId: string,
+): Promise<Problem> {
+  const response = await fetch(
+    `${API_URL}/problems/${problemId}/schedule-override`,
+    {
+      method: "DELETE",
+    },
+  );
+  if (!response.ok)
+    throw new Error("Could not clear the revision-date override.");
+  return response.json() as Promise<Problem>;
 }

@@ -12,6 +12,7 @@ import {
 
 import {
   createProblem,
+  clearScheduleOverride,
   Difficulty,
   fetchProblems,
   fetchTopics,
@@ -19,6 +20,7 @@ import {
   Problem,
   NamedReference,
   setProblemArchived,
+  setScheduleOverride,
   updateProblem,
 } from "@/lib/problems";
 
@@ -161,6 +163,10 @@ export function ProblemLibrary() {
           .map((pattern) => pattern.trim())
           .filter(Boolean),
       });
+      const revisionDate = String(form.get("next_revision_date") ?? "");
+      if (revisionDate && revisionDate !== editing.next_revision_date) {
+        await setScheduleOverride(editing.id, revisionDate);
+      }
       setEditing(null);
       await load();
     } catch (reason) {
@@ -171,6 +177,20 @@ export function ProblemLibrary() {
       );
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function removeScheduleOverride(problem: Problem) {
+    try {
+      await clearScheduleOverride(problem.id);
+      setEditing(null);
+      await load();
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "Could not clear the override.",
+      );
     }
   }
 
@@ -321,6 +341,14 @@ export function ProblemLibrary() {
                         {problem.difficulty} · {problem.current_mastery_state} ·{" "}
                         {problem.total_attempts} attempts
                       </p>
+                      {problem.next_revision_date && (
+                        <p className="mt-1 text-sm text-slate-500">
+                          Next revision: {problem.next_revision_date}
+                          {problem.next_revision_overridden
+                            ? " · Manually set"
+                            : " · Calculated"}
+                        </p>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -583,6 +611,27 @@ export function ProblemLibrary() {
                   className="field-control"
                 />
               </label>
+              <label className="field-label">
+                Next revision date
+                <input
+                  type="date"
+                  name="next_revision_date"
+                  defaultValue={editing.next_revision_date ?? ""}
+                  className="field-control"
+                />
+                <span className="mt-2 block text-xs font-normal text-slate-400">
+                  Changing this creates a visible manual override.
+                </span>
+              </label>
+              {editing.next_revision_overridden && (
+                <button
+                  type="button"
+                  className="btn-secondary w-full"
+                  onClick={() => void removeScheduleOverride(editing)}
+                >
+                  Use calculated date
+                </button>
+              )}
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -735,6 +784,9 @@ export function ProblemLibrary() {
                       <p className="mt-2 text-sm text-slate-600">
                         {attempt.previous_mastery_state} →{" "}
                         {attempt.calculated_mastery_state}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-500">
+                        {attempt.schedule_explanation}
                       </p>
                       {attempt.notes && (
                         <p className="mt-2 text-sm text-slate-700">

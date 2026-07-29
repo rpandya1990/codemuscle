@@ -13,6 +13,7 @@ from codemuscle.application.problems.schemas import (
     ProblemUpdate,
 )
 from codemuscle.application.problems.service import ProblemService
+from codemuscle.application.scheduling.schemas import ScheduleOverrideRequest
 from codemuscle.domain.enums import Difficulty, MasteryState
 from codemuscle.infrastructure.database.session import get_session
 
@@ -89,3 +90,15 @@ def archive_problem(problem_id: uuid.UUID, session: DatabaseSession) -> ProblemR
 @router.post("/{problem_id}/restore", response_model=ProblemResponse)
 def restore_problem(problem_id: uuid.UUID, session: DatabaseSession) -> ProblemResponse:
     return ProblemService(session).restore(problem_id)
+
+
+@router.put("/{problem_id}/schedule-override", response_model=ProblemResponse)
+def override_schedule(
+    problem_id: uuid.UUID, request: ScheduleOverrideRequest, session: DatabaseSession
+) -> ProblemResponse:
+    return ProblemService(session).override_schedule(problem_id, request)
+
+
+@router.delete("/{problem_id}/schedule-override", response_model=ProblemResponse)
+def clear_schedule_override(problem_id: uuid.UUID, session: DatabaseSession) -> ProblemResponse:
+    return ProblemService(session).clear_schedule_override(problem_id)

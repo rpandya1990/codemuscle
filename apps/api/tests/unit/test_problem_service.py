@@ -1,5 +1,6 @@
 import uuid
 from collections.abc import Iterator
+from datetime import date
 
 import pytest
 from pydantic import HttpUrl
@@ -8,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from codemuscle.application.problems.schemas import ProblemCreate, ProblemUpdate
 from codemuscle.application.problems.service import ProblemService
+from codemuscle.application.scheduling.schemas import ScheduleOverrideRequest
 from codemuscle.domain.enums import Difficulty
 from codemuscle.domain.exceptions import ProblemNotFoundError
 from codemuscle.infrastructure.database.base import Base
@@ -50,6 +52,15 @@ def test_create_update_filter_archive_and_restore_problem(session: Session) -> N
     assert service.list().total == 0
     assert service.list(archived=True).total == 1
     assert service.restore(created.id).archived_at is None
+
+    overridden = service.override_schedule(
+        created.id, ScheduleOverrideRequest(next_revision_date=date(2026, 8, 15))
+    )
+    assert overridden.next_revision_date == date(2026, 8, 15)
+    assert overridden.next_revision_overridden is True
+    cleared = service.clear_schedule_override(created.id)
+    assert cleared.next_revision_date == cleared.calculated_next_revision_date
+    assert cleared.next_revision_overridden is False
 
 
 def test_duplicate_detection_returns_strongest_reason(session: Session) -> None:

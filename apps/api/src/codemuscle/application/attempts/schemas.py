@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -32,6 +32,7 @@ class AttemptResponse(BaseModel):
     complexity_understood: bool | None
     previous_mastery_state: MasteryState
     calculated_mastery_state: MasteryState
+    calculated_next_revision_date: date
     schedule_explanation: str
     created_at: datetime
 

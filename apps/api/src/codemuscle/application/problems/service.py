@@ -22,6 +22,7 @@ from codemuscle.application.problems.schemas import (
     ProblemResponse,
     ProblemUpdate,
 )
+from codemuscle.application.scheduling.schemas import ScheduleOverrideRequest
 from codemuscle.domain.enums import Difficulty, MasteryState
 from codemuscle.domain.exceptions import ProblemNotFoundError
 from codemuscle.infrastructure.database.models.problem import Pattern, Problem, Topic
@@ -97,6 +98,22 @@ class ProblemService:
     def restore(self, problem_id: uuid.UUID) -> ProblemResponse:
         problem = self._get_model(problem_id)
         problem.archived_at = None
+        self.session.commit()
+        return self.get(problem_id)
+
+    def override_schedule(
+        self, problem_id: uuid.UUID, request: ScheduleOverrideRequest
+    ) -> ProblemResponse:
+        problem = self._get_model(problem_id)
+        problem.next_revision_date = request.next_revision_date
+        problem.next_revision_overridden = True
+        self.session.commit()
+        return self.get(problem_id)
+
+    def clear_schedule_override(self, problem_id: uuid.UUID) -> ProblemResponse:
+        problem = self._get_model(problem_id)
+        problem.next_revision_date = problem.calculated_next_revision_date
+        problem.next_revision_overridden = False
         self.session.commit()
         return self.get(problem_id)
 
