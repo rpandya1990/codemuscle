@@ -25,8 +25,6 @@ def test_core_model_metadata_contains_milestone_one_tables() -> None:
         "attempts",
         "user_preferences",
         "backup_records",
-        "import_jobs",
-        "import_rows",
     }.issubset(Base.metadata.tables)
 
 

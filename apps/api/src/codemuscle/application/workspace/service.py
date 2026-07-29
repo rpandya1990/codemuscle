@@ -6,7 +6,7 @@ from codemuscle.application.workspace.schemas import WorkspaceManifest, Workspac
 
 
 class WorkspaceService:
-    directories = ("imports", "exports", "backups", "logs")
+    directories = ("exports", "backups", "logs")
     manifest_name = "workspace.json"
 
     def initialize(self, path: Path) -> WorkspaceResponse:

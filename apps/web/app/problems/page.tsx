@@ -5,12 +5,9 @@ import { ProblemLibrary } from "@/features/problems/problem-library";
 export default function ProblemsPage() {
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <Link href="/" className="btn-quiet -ml-3">
           ← Dashboard
-        </Link>
-        <Link href="/import" className="btn-secondary">
-          Import CSV or Excel →
         </Link>
       </div>
       <div className="mb-10 mt-8 max-w-2xl">

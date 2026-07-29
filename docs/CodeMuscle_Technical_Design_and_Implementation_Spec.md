@@ -4,6 +4,11 @@
 
 **Product source:** This document translates the approved *CodeMuscle v1 Functional Specification* into technical architecture and implementation decisions. The product requirements remain the source of truth. Where this document introduces technologies, schemas, APIs, or engineering conventions, those are implementation decisions rather than changes to the product scope.
 
+> **Scope amendment (2026-07-28):** The data-import workflow has been removed from the product.
+> All CSV, Excel, import mapping, import preview, import retry, and legacy-import requirements in
+> this document are superseded by [ADR 0002](decisions/0002-remove-data-import.md) and must not be
+> implemented.
+
 ---
 
 ## 1. Product definition
@@ -16,7 +21,6 @@ CodeMuscle is a private, open-source coding interview revision tracker that help
 - Generating a daily revision queue
 - Explaining why each problem was selected
 - Measuring retention across topics and patterns
-- Importing existing Excel or CSV preparation history
 - Exporting, backing up, restoring, and deleting personal data
 - Optionally using AI for suggestions and summaries
 
