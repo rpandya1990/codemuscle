@@ -39,6 +39,7 @@ export async function fetchProblems(
   search: string,
   archived: boolean,
   difficulty?: Difficulty,
+  topicId?: string,
 ): Promise<ProblemList> {
   const parameters = new URLSearchParams({
     archived: String(archived),
@@ -46,9 +47,16 @@ export async function fetchProblems(
   });
   if (search) parameters.set("search", search);
   if (difficulty) parameters.set("difficulty", difficulty);
+  if (topicId) parameters.set("topic_id", topicId);
   const response = await fetch(`${API_URL}/problems?${parameters}`);
   if (!response.ok) throw new Error("Could not load the problem library.");
   return response.json() as Promise<ProblemList>;
+}
+
+export async function fetchTopics(): Promise<NamedReference[]> {
+  const response = await fetch(`${API_URL}/problems/topics`);
+  if (!response.ok) throw new Error("Could not load topics.");
+  return response.json() as Promise<NamedReference[]>;
 }
 
 export async function updateProblem(

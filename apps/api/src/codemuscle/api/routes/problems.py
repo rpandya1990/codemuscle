@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from codemuscle.application.problems.schemas import (
     DuplicateCandidate,
+    NamedReference,
     ProblemCreate,
     ProblemListResponse,
     ProblemResponse,
@@ -61,6 +62,11 @@ def list_problems(
 @router.post("", response_model=ProblemResponse, status_code=201)
 def create_problem(data: ProblemCreate, session: DatabaseSession) -> ProblemResponse:
     return ProblemService(session).create(data)
+
+
+@router.get("/topics", response_model=list[NamedReference])
+def list_topics(session: DatabaseSession) -> list[NamedReference]:
+    return ProblemService(session).list_topics()
 
 
 @router.get("/{problem_id}", response_model=ProblemResponse)

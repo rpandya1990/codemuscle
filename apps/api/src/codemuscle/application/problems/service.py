@@ -16,6 +16,7 @@ from codemuscle.application.problems.normalization import (
 )
 from codemuscle.application.problems.schemas import (
     DuplicateCandidate,
+    NamedReference,
     ProblemCreate,
     ProblemListResponse,
     ProblemResponse,
@@ -144,6 +145,10 @@ class ProblemService:
             page=page,
             page_size=page_size,
         )
+
+    def list_topics(self) -> list[NamedReference]:
+        topics = self.session.scalars(select(Topic).order_by(func.lower(Topic.name))).all()
+        return [NamedReference.model_validate(topic) for topic in topics]
 
     def duplicates(
         self,

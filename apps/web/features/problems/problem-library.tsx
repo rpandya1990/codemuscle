@@ -6,8 +6,10 @@ import {
   createProblem,
   Difficulty,
   fetchProblems,
+  fetchTopics,
   findDuplicates,
   Problem,
+  NamedReference,
   setProblemArchived,
   updateProblem,
 } from "@/lib/problems";
@@ -19,6 +21,8 @@ export function ProblemLibrary() {
   const [search, setSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty | "">("");
+  const [topicId, setTopicId] = useState("");
+  const [topics, setTopics] = useState<NamedReference[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
@@ -41,6 +45,7 @@ export function ProblemLibrary() {
         search,
         showArchived,
         difficulty || undefined,
+        topicId || undefined,
       );
       setProblems(result.items);
       setPage((current) =>
@@ -57,7 +62,17 @@ export function ProblemLibrary() {
     } finally {
       setLoading(false);
     }
-  }, [difficulty, search, showArchived]);
+  }, [difficulty, search, showArchived, topicId]);
+
+  useEffect(() => {
+    void fetchTopics()
+      .then(setTopics)
+      .catch((reason: unknown) =>
+        setError(
+          reason instanceof Error ? reason.message : "Could not load topics.",
+        ),
+      );
+  }, []);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void load(), 200);
@@ -178,6 +193,22 @@ export function ProblemLibrary() {
             <option value="MEDIUM">Medium</option>
             <option value="HARD">Hard</option>
             <option value="UNKNOWN">Unknown</option>
+          </select>
+          <select
+            aria-label="Filter by topic"
+            className="min-h-11 rounded-xl border-0 bg-slate-50 px-4 text-sm font-medium text-slate-700 outline-none ring-1 ring-inset ring-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-600"
+            value={topicId}
+            onChange={(event) => {
+              setTopicId(event.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All topics</option>
+            {topics.map((topic) => (
+              <option key={topic.id} value={topic.id}>
+                {topic.name}
+              </option>
+            ))}
           </select>
           <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
             <input
