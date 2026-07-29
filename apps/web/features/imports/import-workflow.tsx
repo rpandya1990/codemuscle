@@ -24,6 +24,13 @@ const fields = [
   ["next_revision_date", "Next revision date"],
 ] as const;
 
+const statusStyles: Record<string, string> = {
+  VALID: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  INVALID: "border-red-200 bg-red-50 text-red-800",
+  DUPLICATE: "border-amber-200 bg-amber-50 text-amber-800",
+  IMPORTED: "border-sky-200 bg-sky-50 text-sky-800",
+};
+
 export function ImportWorkflow() {
   const [job, setJob] = useState<ImportJob | null>(null);
   const [mapping, setMapping] = useState<Record<string, string>>({});
@@ -81,44 +88,82 @@ export function ImportWorkflow() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <form
         onSubmit={(event) => void upload(event)}
-        className="rounded-2xl border bg-white p-6"
+        className="surface-card overflow-hidden"
       >
-        <label className="block font-medium">
-          CSV or Excel file
-          <input
-            className="mt-3 block w-full rounded-xl border p-3"
-            name="file"
-            type="file"
-            accept=".csv,.xlsx"
-            required
-          />
-        </label>
-        <button
-          disabled={busy}
-          className="mt-4 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white disabled:opacity-50"
-        >
-          Upload securely
-        </button>
+        <div className="border-b border-slate-100 px-6 py-5">
+          <div className="flex items-center gap-3">
+            <span className="flex size-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
+              1
+            </span>
+            <div>
+              <h2 className="font-semibold text-slate-900">
+                Choose your source file
+              </h2>
+              <p className="mt-0.5 text-sm text-slate-500">
+                Your original file stays in your private workspace.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          <label className="group flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 px-6 py-10 text-center transition hover:border-emerald-400 hover:bg-emerald-50/40">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-white text-2xl text-emerald-700 shadow-sm ring-1 ring-slate-200">
+              ↑
+            </span>
+            <span className="mt-4 font-semibold text-slate-800">
+              Select a CSV or Excel file
+            </span>
+            <span className="mt-1 text-sm text-slate-500">
+              .csv or .xlsx · maximum 10 MB
+            </span>
+            <input
+              aria-label="CSV or Excel file"
+              className="mt-5 block max-w-full text-sm text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-100 file:px-4 file:py-2 file:font-semibold file:text-emerald-800 hover:file:bg-emerald-200"
+              name="file"
+              type="file"
+              accept=".csv,.xlsx"
+              required
+            />
+          </label>
+          <div className="mt-5 flex justify-end">
+            <button disabled={busy} className="btn-primary">
+              {busy ? "Uploading…" : "Upload securely"}
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
       </form>
 
       {error && (
-        <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">
+        <p
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+        >
           {error}
         </p>
       )}
 
       {job && job.rows.length === 0 && (
-        <section className="rounded-2xl border bg-white p-6">
-          <h2 className="text-xl font-semibold">Map columns</h2>
-          <p className="mt-2 text-sm text-slate-500">
-            Review the suggested mapping. A title column is required.
-          </p>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <section className="surface-card overflow-hidden">
+          <div className="border-b border-slate-100 px-6 py-5">
+            <div className="flex items-center gap-3">
+              <span className="flex size-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
+                2
+              </span>
+              <div>
+                <h2 className="font-semibold text-slate-900">Map columns</h2>
+                <p className="mt-0.5 text-sm text-slate-500">
+                  Review the suggestions. Only problem title is required.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-x-6 gap-y-5 p-6 sm:grid-cols-2">
             {fields.map(([field, label]) => (
-              <label key={field} className="text-sm font-medium">
+              <label key={field} className="field-label">
                 {label}
                 {field === "title" ? " *" : ""}
                 <select
@@ -129,7 +174,7 @@ export function ImportWorkflow() {
                       [field]: event.target.value,
                     }))
                   }
-                  className="mt-1 w-full rounded-xl border p-3"
+                  className="field-control"
                 >
                   <option value="">Not mapped</option>
                   {job.headers.map((header) => (
@@ -139,51 +184,100 @@ export function ImportWorkflow() {
               </label>
             ))}
           </div>
-          <button
-            disabled={busy || !mapping.title}
-            onClick={() => void preview()}
-            className="mt-6 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white disabled:opacity-50"
-          >
-            Validate and preview
-          </button>
+          <div className="flex justify-end border-t border-slate-100 bg-slate-50/60 px-6 py-4">
+            <button
+              type="button"
+              disabled={busy || !mapping.title}
+              onClick={() => void preview()}
+              className="btn-primary"
+            >
+              {busy ? "Validating…" : "Validate and preview"}
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </section>
       )}
 
       {job && job.rows.length > 0 && (
-        <section className="rounded-2xl border bg-white p-6">
-          <div className="flex flex-wrap gap-3 text-sm">
-            <span className="rounded-full bg-slate-100 px-3 py-1">
-              Total {job.total_rows}
-            </span>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-800">
-              Valid {job.valid_rows}
-            </span>
-            <span className="rounded-full bg-red-50 px-3 py-1 text-red-800">
-              Invalid {job.invalid_rows}
-            </span>
-            <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-800">
-              Duplicates {job.duplicate_rows}
-            </span>
+        <section className="surface-card overflow-hidden">
+          <div className="border-b border-slate-100 px-6 py-5">
+            <div className="flex items-center gap-3">
+              <span className="flex size-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
+                3
+              </span>
+              <div>
+                <h2 className="font-semibold text-slate-900">Review import</h2>
+                <p className="mt-0.5 text-sm text-slate-500">
+                  Fix invalid rows and decide whether to keep possible
+                  duplicates.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="mt-5 overflow-x-auto">
+          <div className="grid grid-cols-2 gap-3 p-6 sm:grid-cols-4">
+            <div className="rounded-xl bg-slate-50 p-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                Total
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-slate-800">
+                {job.total_rows}
+              </p>
+            </div>
+            <div className="rounded-xl bg-emerald-50 p-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-emerald-600">
+                Valid
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-emerald-800">
+                {job.valid_rows}
+              </p>
+            </div>
+            <div className="rounded-xl bg-red-50 p-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-red-500">
+                Invalid
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-red-800">
+                {job.invalid_rows}
+              </p>
+            </div>
+            <div className="rounded-xl bg-amber-50 p-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-amber-600">
+                Duplicates
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-amber-800">
+                {job.duplicate_rows}
+              </p>
+            </div>
+          </div>
+          <div className="overflow-x-auto border-y border-slate-200">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b">
-                  <th className="p-3">Row</th>
-                  <th className="p-3">Title</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Review</th>
+                <tr className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                  <th className="px-5 py-3 font-semibold">Row</th>
+                  <th className="px-5 py-3 font-semibold">Title</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                  <th className="px-5 py-3 font-semibold">Review</th>
                 </tr>
               </thead>
               <tbody>
                 {job.rows.map((row) => (
-                  <tr key={row.id} className="border-b align-top">
-                    <td className="p-3">{row.row_number}</td>
-                    <td className="p-3">
+                  <tr
+                    key={row.id}
+                    className="border-b border-slate-100 align-top last:border-0 hover:bg-slate-50/70"
+                  >
+                    <td className="px-5 py-4 font-mono text-xs text-slate-400">
+                      {row.row_number}
+                    </td>
+                    <td className="px-5 py-4 font-medium text-slate-800">
                       {String(row.parsed_data?.title ?? "—")}
                     </td>
-                    <td className="p-3 font-medium">{row.status}</td>
-                    <td className="p-3">
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[row.status] ?? "border-slate-200 bg-slate-50 text-slate-700"}`}
+                      >
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
                       {row.status === "INVALID" && (
                         <div>
                           <p className="text-red-700">
@@ -199,13 +293,14 @@ export function ImportWorkflow() {
                                 [row.id]: event.target.value,
                               }))
                             }
-                            className="mt-2 rounded-lg border p-2"
+                            className="field-control mt-2 max-w-xs"
                           />
                         </div>
                       )}
                       {row.status === "DUPLICATE" && (
-                        <label className="flex gap-2">
+                        <label className="flex cursor-pointer items-center gap-2 font-medium text-slate-700">
                           <input
+                            className="size-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
                             type="checkbox"
                             checked={acceptedDuplicates.includes(row.id)}
                             onChange={(event) =>
@@ -225,12 +320,12 @@ export function ImportWorkflow() {
               </tbody>
             </table>
           </div>
-          <div className="mt-6 flex gap-3">
+          <div className="flex flex-wrap justify-end gap-3 bg-slate-50/60 px-6 py-4">
             {job.invalid_rows > 0 && (
               <button
                 disabled={busy}
                 onClick={() => void retry()}
-                className="rounded-xl border px-5 py-3 font-semibold"
+                className="btn-secondary"
               >
                 Retry corrections
               </button>
@@ -238,7 +333,7 @@ export function ImportWorkflow() {
             <button
               disabled={busy}
               onClick={() => void commit()}
-              className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white"
+              className="btn-primary"
             >
               Import valid rows
             </button>
@@ -249,7 +344,7 @@ export function ImportWorkflow() {
       {result && (
         <p
           role="status"
-          className="rounded-xl bg-emerald-50 p-5 text-emerald-900"
+          className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 font-medium text-emerald-900 shadow-sm"
         >
           Imported {result.imported} problems. Skipped {result.skipped_invalid}{" "}
           invalid and {result.skipped_duplicates} possible duplicates.
