@@ -5,9 +5,9 @@
 
 # Private CodeMuscle data
 CodeMuscleData/
-imports/
-exports/
-backups/
+/imports/
+/exports/
+/backups/
 *.dump
 *.sql
 

@@ -3,6 +3,7 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
+    JSON,
     CheckConstraint,
     Column,
     Date,
@@ -74,6 +75,10 @@ class Problem(TimestampMixin, Base):
     estimated_duration_minutes: Mapped[int | None] = mapped_column(Integer)
     successful_revision_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     total_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    import_job_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("import_jobs.id"), index=True
+    )
+    legacy_import_metadata: Mapped[dict[str, object] | None] = mapped_column(JSON)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
 
     topics: Mapped[list["Topic"]] = relationship(

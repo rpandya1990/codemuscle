@@ -5,8 +5,10 @@ description = "CodeMuscle API"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115,<1",
+  "openpyxl>=3.1,<4",
   "pydantic-settings>=2.7,<3",
   "psycopg[binary]>=3.2,<4",
+  "python-multipart>=0.0.20,<1",
   "sqlalchemy>=2.0,<3",
   "uvicorn[standard]>=0.34,<1",
 ]
@@ -45,4 +47,3 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 include = ["src", "tests"]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
-
