@@ -43,7 +43,7 @@ def list_problems(
     platform: str | None = None,
     archived: bool = False,
     page: Annotated[int, Query(ge=1)] = 1,
-    page_size: Annotated[int, Query(ge=1, le=100)] = 25,
+    page_size: Annotated[int, Query(ge=1, le=5000)] = 25,
 ) -> ProblemListResponse:
     return ProblemService(session).list(
         search=search,

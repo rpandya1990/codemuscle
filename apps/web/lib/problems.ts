@@ -40,7 +40,10 @@ export async function fetchProblems(
   archived: boolean,
   difficulty?: Difficulty,
 ): Promise<ProblemList> {
-  const parameters = new URLSearchParams({ archived: String(archived) });
+  const parameters = new URLSearchParams({
+    archived: String(archived),
+    page_size: "5000",
+  });
   if (search) parameters.set("search", search);
   if (difficulty) parameters.set("difficulty", difficulty);
   const response = await fetch(`${API_URL}/problems?${parameters}`);
@@ -52,7 +55,7 @@ export async function updateProblem(
   problemId: string,
   input: {
     title: string;
-    url: string;
+    url: string | null;
     difficulty: Difficulty;
     notes: string | null;
     patterns: string[];
@@ -69,7 +72,7 @@ export async function updateProblem(
 
 export async function createProblem(input: {
   title: string;
-  url: string;
+  url?: string;
   difficulty: Difficulty;
   notes?: string;
   topics: string[];

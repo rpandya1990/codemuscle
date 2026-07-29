@@ -221,10 +221,10 @@ class ImportService:
         difficulty = (
             Difficulty(difficulty_value) if difficulty_value in Difficulty else Difficulty.UNKNOWN
         )
-        url_value = str(parsed["url"]).strip() if parsed.get("url") else ""
+        url_value = str(parsed["url"]).strip() if parsed.get("url") else None
         return ProblemCreate(
             title=str(parsed.get("title") or "").strip(),
-            url=HttpUrl(url_value),
+            url=HttpUrl(url_value) if url_value else None,
             difficulty=difficulty,
             notes=str(parsed["notes"]) if parsed.get("notes") else None,
             topics=ImportService._split_values(parsed.get("topic")),
