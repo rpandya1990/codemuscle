@@ -37,7 +37,12 @@ class ProblemService:
         self.session.commit()
         return self.get(problem.id)
 
-    def add(self, data: ProblemCreate) -> Problem:
+    def add(
+        self,
+        data: ProblemCreate,
+        import_job_id: uuid.UUID | None = None,
+        legacy_import_metadata: dict[str, object] | None = None,
+    ) -> Problem:
         problem = Problem(
             title=data.title,
             normalized_title=normalize_title(data.title),
@@ -49,6 +54,8 @@ class ProblemService:
             notes=data.notes,
             priority=data.priority,
             estimated_duration_minutes=data.estimated_duration_minutes,
+            import_job_id=import_job_id,
+            legacy_import_metadata=legacy_import_metadata,
             topics=self._resolve_names(Topic, data.topics),
             patterns=self._resolve_names(Pattern, data.patterns),
         )

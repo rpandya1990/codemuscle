@@ -21,6 +21,7 @@ class WorkspaceInitializeRequest(BaseModel):
 class WorkspaceManifest(BaseModel):
     workspace_version: int = Field(default=1, ge=1)
     created_at: datetime
+    imports_directory: str = "imports"
     exports_directory: str = "exports"
     backups_directory: str = "backups"
 

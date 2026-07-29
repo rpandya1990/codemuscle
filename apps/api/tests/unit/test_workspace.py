@@ -13,6 +13,7 @@ def test_initialize_workspace_creates_manifest_and_private_directories(tmp_path:
     assert (workspace / "workspace.json").is_file()
     assert {path.name for path in workspace.iterdir()} == {
         "workspace.json",
+        "imports",
         "exports",
         "backups",
         "logs",
