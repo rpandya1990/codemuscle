@@ -27,6 +27,14 @@ class ImportNotFoundError(DomainError):
         super().__init__("The requested import does not exist.", {"import_id": str(import_id)})
 
 
+class QueueNotFoundError(DomainError):
+    code = "QUEUE_NOT_FOUND"
+    status_code = 404
+
+    def __init__(self, queue_id: uuid.UUID) -> None:
+        super().__init__("The requested queue does not exist.", {"queue_id": str(queue_id)})
+
+
 class WorkspaceNotInitializedError(DomainError):
     code = "WORKSPACE_NOT_INITIALIZED"
 

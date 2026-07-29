@@ -21,6 +21,13 @@ export default function HomePage() {
           >
             Open your problem library →
           </Link>
+          <span className="mx-3 text-emerald-300">|</span>
+          <Link
+            href="/queue"
+            className="font-semibold underline underline-offset-4"
+          >
+            Build today’s queue →
+          </Link>
         </div>
       </section>
     </main>
