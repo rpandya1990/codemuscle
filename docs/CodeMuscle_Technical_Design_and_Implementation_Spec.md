@@ -1462,8 +1462,6 @@ Deliver:
 Deliver:
 
 - CSV export
-- JSON export
-- Excel export
 - Backup
 - Restore
 - Delete all personal data

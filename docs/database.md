@@ -152,9 +152,10 @@ timestamps. Intervals are validated as unique ascending days between 1 and 3650.
 
 ### `backup_records`
 
-Purpose: metadata reserved for the data-lifecycle milestone. Columns: `id UUID PK`,
+Purpose: metadata for versioned ZIP backups. Columns: `id UUID PK`,
 `filename varchar(500)`, `manifest_version integer`, `application_version varchar(50)`,
-`status varchar(50)`, and `created_at`. Backup behavior is not implemented yet.
+`status varchar(50)`, and `created_at`. The archive itself lives in the private workspace `backups/`
+directory. A backup database snapshot includes this table so restore also restores backup metadata.
 
 ## Enums
 

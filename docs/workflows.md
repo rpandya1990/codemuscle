@@ -159,6 +159,37 @@ Topic and pattern results include explanations, due/overdue counts, mastery dist
 trend. Dashboard practice-this-week counts distinct problems attempted since Monday. Trend endpoints
 return explicit zero-value weeks so charts do not imply missing data.
 
+## Export, backup, restore, and deletion — implemented
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant W as Data management UI
+    participant A as Data lifecycle API
+    participant S as DataLifecycleService
+    participant D as PostgreSQL
+    participant F as Private workspace
+    U->>W: Export CSV/JSON/XLSX
+    W->>A: POST /exports
+    S->>D: Read problems and attempts
+    S->>F: Write private export artifact
+    A-->>W: Filename and counts
+    U->>W: Create backup
+    S->>D: Snapshot versioned tables
+    S->>F: Write ZIP manifest + database + optional files
+    U->>W: Type RESTORE
+    S->>F: Validate archive and manifest
+    S->>D: Replace rows in one transaction
+    U->>W: Type DELETE ALL DATA
+    S->>D: Delete application rows in FK-safe order
+    S->>F: Clear selected private directories
+```
+
+Restore never accepts an unsupported manifest or incomplete snapshot. Database replacement is one
+transaction; optional workspace files are restored after validation but filesystem writes cannot share
+the PostgreSQL transaction. Deletion preserves backup files by default and reports exactly which
+directories were cleared. Tests use temporary fictional workspaces only.
+
 ## Future AI resume generation — planned, not implemented
 
 ```mermaid

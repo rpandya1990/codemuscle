@@ -44,3 +44,15 @@ class WorkspaceNotInitializedError(DomainError):
 
 class ImportFileError(DomainError):
     code = "INVALID_IMPORT_FILE"
+
+
+class DataLifecycleError(DomainError):
+    code = "DATA_LIFECYCLE_ERROR"
+
+
+class BackupNotFoundError(DomainError):
+    code = "BACKUP_NOT_FOUND"
+    status_code = 404
+
+    def __init__(self, backup_id: uuid.UUID) -> None:
+        super().__init__("The requested backup does not exist.", {"backup_id": str(backup_id)})

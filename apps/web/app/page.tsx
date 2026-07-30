@@ -37,6 +37,13 @@ export default function HomePage() {
           >
             View statistics →
           </Link>
+          <span className="mx-3 text-emerald-300">|</span>
+          <Link
+            href="/data"
+            className="font-semibold underline underline-offset-4"
+          >
+            Manage data →
+          </Link>
         </div>
       </section>
       <DashboardOverview />

@@ -4,10 +4,10 @@ CodeMuscle is a private coding-interview revision tracker. Development follows t
 
 ## Current status
 
-Milestones 0–7 establish the monorepo, private workspace, problem library, safe CSV/Excel import,
+Milestones 0–8 establish the monorepo, private workspace, problem library, safe CSV/Excel import,
 immutable attempt tracking, deterministic spaced-repetition scheduling, persistent time-bounded daily
-queues, and deterministic dashboard/topic/pattern statistics. The next planned milestone is data
-lifecycle management.
+queues, deterministic dashboard/topic/pattern statistics, and export/backup/restore/deletion data
+lifecycle workflows. The next planned milestone is optional AI assistance.
 
 ## Developer documentation
 

@@ -135,6 +135,6 @@ an accepted decision to hide history; supersede it with a new ADR.
 ## Current boundaries and next work
 
 Implemented: repository/workspace, problem library, CSV/XLSX import, attempt tracking, deterministic
-scheduling/manual overrides, persisted daily queues, and deterministic statistics/dashboard. Data
-lifecycle (export/backup/restore/deletion) is the next planned milestone. AI is not implemented. Do not
-present planned workflows as available features.
+scheduling/manual overrides, persisted daily queues, deterministic statistics/dashboard, and data
+lifecycle operations. Optional AI assistance is the next planned milestone. AI is not implemented. Do
+not present planned workflows as available features.

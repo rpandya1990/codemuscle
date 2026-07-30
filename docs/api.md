@@ -159,6 +159,25 @@ Statistics endpoints are read-only and unauthenticated like the rest of the loca
 rate, due/overdue counts, mastery distribution, last-practiced date, recent trend, status, and explicit
 status reasons. Status values are `WEAK`, `NEGLECTED`, `IMPROVING`, and `STABLE`.
 
+## Data lifecycle
+
+| Method and URL | Purpose | Request | Response/errors |
+|---|---|---|---|
+| `POST /exports` | Write private problem/attempt export | `{"format":"CSV|JSON|XLSX","include_archived":true}` | `201 {filename,format,status,problem_count,attempt_count}` |
+| `POST /backups` | Create versioned ZIP backup | `{"include_imports":false,"include_exports":false}` | `201 Backup`; workspace must exist |
+| `GET /backups` | List backup metadata newest first | None | `200 Backup[]` |
+| `POST /backups/{id}/restore` | Validate archive and replace application DB transactionally | `{"confirmation":"RESTORE"}` | `200 {backup_id,status,restored_tables,restored_rows}`; 400 confirmation/manifest/file; 404 backup |
+| `DELETE /data` | Delete application records and selected workspace files | `DeleteDataRequest` with exact confirmation | `200 {status,deleted_rows,cleared_directories,backups_preserved}` |
+
+`DeleteDataRequest` requires `confirmation: "DELETE ALL DATA"` and booleans
+`delete_import_files`, `delete_export_files`, and `delete_backup_files`. Imports/exports default true;
+backups default false. If backups are preserved but user preferences are deleted, reinitialize the same
+workspace path before restoring. Source code and Docker configuration are never deleted.
+
+Exports are returned as metadata because artifacts remain private on disk under `exports/`. JSON
+contains nested problems/attempts; CSV is a flat problem summary; XLSX contains Problems and Attempts
+sheets. Backup ZIPs contain `manifest.json`, `database.json`, and optional `imports/`/`exports/` files.
+
 ## HTTP debugging
 
 ```bash
