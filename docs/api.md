@@ -143,6 +143,22 @@ item score, reasons, duration, status, and embedded problem. Selection does not 
 | `POST /queues/{queue_id}/items` | Manually append problem | `{"problem_id":"uuid"}` | `200 Queue`; 404 problem/queue |
 | `POST /queues/{queue_id}/items/{item_id}/complete` | Mark completed | None | `200 Queue` |
 
+## Statistics
+
+Statistics endpoints are read-only and unauthenticated like the rest of the local API.
+
+| Method and URL | Purpose | Response/validation |
+|---|---|---|
+| `GET /statistics/dashboard` | Active/due/overdue/practiced/mastery counts and 10 recent attempts | `200 DashboardStatistics` |
+| `GET /statistics/topics` | Deterministic statistics and classification for every topic | `200 AreaStatistics[]` |
+| `GET /statistics/patterns` | Same aggregate model for patterns | `200 AreaStatistics[]` |
+| `GET /statistics/trends?weeks=8` | Weekly attempts, independent successes, and failures | `200 {points: TrendPoint[]}`; weeks 1–52 |
+| `GET /statistics/weak-areas` | Topics classified `WEAK` or `NEGLECTED` | `200 AreaStatistics[]` |
+
+`AreaStatistics` contains problem/attempt counts, independent and hint-assisted success rates, failure
+rate, due/overdue counts, mastery distribution, last-practiced date, recent trend, status, and explicit
+status reasons. Status values are `WEAK`, `NEGLECTED`, `IMPROVING`, and `STABLE`.
+
 ## HTTP debugging
 
 ```bash

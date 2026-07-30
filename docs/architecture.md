@@ -1,6 +1,6 @@
 # CodeMuscle architecture
 
-> Start here. This describes the implemented system through Milestone 6. The original plan remains
+> Start here. This describes the implemented system through Milestone 7. The original plan remains
 > in [the technical specification](CodeMuscle_Technical_Design_and_Implementation_Spec.md).
 
 ## Overview and goals
@@ -113,6 +113,7 @@ sequenceDiagram
 - **Import:** file → private workspace copy → intermediate rows → preview/duplicate review → commit.
 - **Attempt:** input → `AttemptService` → scheduling policy → immutable attempt and problem summary.
 - **Queue:** request → `QueueService` → scoring/time-fit policy → persisted items and explanations.
+- **Statistics:** read-only aggregates → classification policy → dashboard, area tables, and trends.
 
 Detailed sequences are in [workflows.md](workflows.md).
 
@@ -148,11 +149,13 @@ snapshots may be cached later, but must be invalidated after attempts/imports an
 - PostgreSQL and immutable history: [ADR 0002](adr/0002-database-design.md).
 - Deterministic scheduling: [ADR 0003](adr/0003-deterministic-scheduling.md).
 - Persisted explainable queues: [ADR 0004](adr/0004-daily-queue.md).
+- Deterministic statistics classification: [ADR 0005](adr/0005-statistics-classification.md).
 - Import migrations `0004` and `0005` intentionally preserve removal/restoration history.
 
-Milestone 7 can add statistics without changing scheduling. Weak-topic classification should be a
-pure policy consumed by queue scoring. AI may summarize deterministic data or suggest metadata, but
-must remain disabled by default, schema-validated, and explicitly approved before persistence.
+Statistics and weak-area classification are read-only and deterministic. Queue scoring can consume
+these classifications in a future refinement. AI may summarize deterministic data or suggest
+metadata, but must remain disabled by default, schema-validated, and explicitly approved before
+persistence.
 
 ## Local operation
 

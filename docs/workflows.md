@@ -129,7 +129,7 @@ marks the queue item; recording the actual attempt remains a separate explicit a
 5. Archive sets `archived_at`, excluding the problem from normal lists and queues.
 6. Restore clears `archived_at`. There is no normal hard-delete endpoint.
 
-## Dashboard statistics — planned for Milestone 7
+## Dashboard statistics and weak-area detection — implemented
 
 ```mermaid
 sequenceDiagram
@@ -146,8 +146,18 @@ sequenceDiagram
     W-->>U: Due, overdue, trends, mastery, weak areas
 ```
 
-This is not implemented yet. Classification thresholds must be centralized and tested. Statistics
-must derive from authoritative attempts/problems and must not mutate scheduling state.
+Statistics derive from active problems and immutable attempts and never mutate scheduling. Current
+classification thresholds are:
+
+- `NEGLECTED`: no attempts, or no practice for at least 30 days.
+- `WEAK`: at least three attempts and either independent success below 50% or failure at least 35%.
+- `IMPROVING`: at least four attempts, no weak condition, and recent success improves by at least 20
+  percentage points over the older half of attempts.
+- `STABLE`: none of the above.
+
+Topic and pattern results include explanations, due/overdue counts, mastery distribution, and recent
+trend. Dashboard practice-this-week counts distinct problems attempted since Monday. Trend endpoints
+return explicit zero-value weeks so charts do not imply missing data.
 
 ## Future AI resume generation — planned, not implemented
 
