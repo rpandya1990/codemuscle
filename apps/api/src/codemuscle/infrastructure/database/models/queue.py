@@ -17,6 +17,7 @@ class QueueSession(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     available_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
     topic_focus_ids: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    difficulty_focus: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     requested_problem_count: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(30), default="ACTIVE", nullable=False)
     created_at: Mapped[datetime] = mapped_column(

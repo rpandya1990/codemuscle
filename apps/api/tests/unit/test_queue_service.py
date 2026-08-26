@@ -45,3 +45,23 @@ def test_generate_persist_and_edit_queue(session: Session) -> None:
     )
     removed = service.remove_item(queue.id, queue.items[0].id)
     assert len(removed.items) == 1
+
+
+def test_generate_filters_multiple_difficulties(session: Session) -> None:
+    problems = ProblemService(session)
+    problems.create(ProblemCreate(title="Easy", difficulty=Difficulty.EASY))
+    problems.create(ProblemCreate(title="Medium", difficulty=Difficulty.MEDIUM))
+    problems.create(ProblemCreate(title="Hard", difficulty=Difficulty.HARD))
+
+    queue = QueueService(session).generate(
+        QueueGenerationRequest(
+            available_minutes=120,
+            difficulty_focus=[Difficulty.EASY, Difficulty.HARD],
+        )
+    )
+
+    assert queue.difficulty_focus == [Difficulty.EASY, Difficulty.HARD]
+    assert {item.problem.difficulty for item in queue.items} == {
+        Difficulty.EASY,
+        Difficulty.HARD,
+    }

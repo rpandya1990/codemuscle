@@ -102,4 +102,80 @@ describe("ProblemsPage", () => {
     expect(screen.getByText("Showing 26–26 of 26")).toBeVisible();
     expect(screen.getByText("Problem 26")).toBeVisible();
   });
+
+  it("shows a problem's link when one is available", async () => {
+    vi.mocked(fetchProblems).mockResolvedValueOnce({
+      items: [
+        {
+          id: "two-sum",
+          title: "Two Sum",
+          url: "https://leetcode.com/problems/two-sum/",
+          platform: "LeetCode",
+          difficulty: "EASY",
+          notes: null,
+          priority: 3,
+          total_attempts: 0,
+          successful_revision_streak: 0,
+          next_revision_date: null,
+          calculated_next_revision_date: null,
+          next_revision_overridden: false,
+          current_mastery_state: "NEW",
+          archived_at: null,
+          topics: [],
+          patterns: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 5000,
+    });
+
+    render(<ProblemsPage />);
+
+    const problemLink = await screen.findByRole("link", {
+      name: "Open Two Sum problem link (opens in a new tab)",
+    });
+    expect(problemLink).toBeVisible();
+    expect(problemLink).toHaveAttribute(
+      "href",
+      "https://leetcode.com/problems/two-sum/",
+    );
+    expect(problemLink).toHaveAttribute("target", "_blank");
+  });
+
+  it("shows a muted link icon when a problem has no link", async () => {
+    vi.mocked(fetchProblems).mockResolvedValueOnce({
+      items: [
+        {
+          id: "no-link",
+          title: "Problem without link",
+          url: null,
+          platform: null,
+          difficulty: "UNKNOWN",
+          notes: null,
+          priority: 3,
+          total_attempts: 0,
+          successful_revision_streak: 0,
+          next_revision_date: null,
+          calculated_next_revision_date: null,
+          next_revision_overridden: false,
+          current_mastery_state: "NEW",
+          archived_at: null,
+          topics: [],
+          patterns: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 5000,
+    });
+
+    render(<ProblemsPage />);
+
+    expect(
+      await screen.findByRole("img", {
+        name: "No problem link available for Problem without link",
+      }),
+    ).toHaveClass("text-slate-300");
+  });
 });

@@ -13,6 +13,7 @@ from codemuscle.application.queues.schemas import (
     QueueItemUpdateRequest,
     QueueResponse,
 )
+from codemuscle.domain.enums import Difficulty
 from codemuscle.domain.exceptions import ProblemNotFoundError, QueueNotFoundError
 from codemuscle.infrastructure.database.models import Problem, QueueItem, QueueSession, Topic
 
@@ -25,6 +26,8 @@ class QueueService:
         query = self._problem_query().where(Problem.archived_at.is_(None))
         if request.topic_focus_ids:
             query = query.where(Problem.topics.any(Topic.id.in_(request.topic_focus_ids)))
+        if request.difficulty_focus:
+            query = query.where(Problem.difficulty.in_(request.difficulty_focus))
         problems = list(self.session.scalars(query).unique())
         candidates = [score_problem(problem, date.today()) for problem in problems]
         selected = select_candidates(
@@ -33,6 +36,7 @@ class QueueService:
         queue = QueueSession(
             available_minutes=request.available_minutes,
             topic_focus_ids=[str(topic_id) for topic_id in request.topic_focus_ids],
+            difficulty_focus=[difficulty.value for difficulty in request.difficulty_focus],
             requested_problem_count=request.requested_problem_count,
         )
         self.session.add(queue)
@@ -56,6 +60,7 @@ class QueueService:
             id=queue.id,
             available_minutes=queue.available_minutes,
             topic_focus_ids=queue.topic_focus_ids,
+            difficulty_focus=[Difficulty(value) for value in queue.difficulty_focus],
             requested_problem_count=queue.requested_problem_count,
             status=queue.status,
             created_at=queue.created_at,
@@ -114,9 +119,12 @@ class QueueService:
     def replace_item(self, queue_id: uuid.UUID, item_id: uuid.UUID) -> QueueResponse:
         queue, item = self._get_item(queue_id, item_id)
         excluded = {queue_item.problem_id for queue_item in queue.items}
-        problems = self.session.scalars(
-            self._problem_query().where(Problem.archived_at.is_(None), Problem.id.not_in(excluded))
-        ).unique()
+        query = self._problem_query().where(
+            Problem.archived_at.is_(None), Problem.id.not_in(excluded)
+        )
+        if queue.difficulty_focus:
+            query = query.where(Problem.difficulty.in_(queue.difficulty_focus))
+        problems = self.session.scalars(query).unique()
         candidates = sorted(
             (score_problem(problem, date.today()) for problem in problems),
             key=lambda candidate: (-candidate.score, candidate.problem.title),

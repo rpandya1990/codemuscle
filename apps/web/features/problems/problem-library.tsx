@@ -337,6 +337,27 @@ export function ProblemLibrary() {
                       <h2 className="text-lg font-semibold tracking-tight text-slate-900">
                         {problem.title}
                       </h2>
+                      {problem.url ? (
+                        <a
+                          href={problem.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Open ${problem.title} problem link (opens in a new tab)`}
+                          title="Open problem link"
+                          className="mt-1 inline-flex size-8 items-center justify-center rounded-lg text-emerald-700 transition hover:bg-emerald-50 hover:text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                        >
+                          <LinkIcon />
+                        </a>
+                      ) : (
+                        <span
+                          role="img"
+                          aria-label={`No problem link available for ${problem.title}`}
+                          title="No problem link available"
+                          className="mt-1 inline-flex size-8 items-center justify-center rounded-lg text-slate-300"
+                        >
+                          <LinkIcon />
+                        </span>
+                      )}
                       <p className="mt-1 text-sm text-slate-500">
                         {problem.difficulty} · {problem.current_mastery_state} ·{" "}
                         {problem.total_attempts} attempts
@@ -802,5 +823,23 @@ export function ProblemLibrary() {
         </div>
       )}
     </div>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
+      <path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" />
+      <path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1" />
+    </svg>
   );
 }

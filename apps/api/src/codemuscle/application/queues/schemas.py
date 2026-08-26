@@ -4,11 +4,13 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 from codemuscle.application.problems.schemas import ProblemResponse
+from codemuscle.domain.enums import Difficulty
 
 
 class QueueGenerationRequest(BaseModel):
     available_minutes: int = Field(ge=5, le=720)
     topic_focus_ids: list[uuid.UUID] = Field(default_factory=list, max_length=30)
+    difficulty_focus: list[Difficulty] = Field(default_factory=list, max_length=4)
     requested_problem_count: int | None = Field(default=None, ge=1, le=100)
 
 
@@ -28,6 +30,7 @@ class QueueResponse(BaseModel):
     id: uuid.UUID
     available_minutes: int
     topic_focus_ids: list[str]
+    difficulty_focus: list[Difficulty]
     requested_problem_count: int | None
     status: str
     created_at: datetime

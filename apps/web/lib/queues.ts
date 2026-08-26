@@ -1,4 +1,4 @@
-import type { Problem } from "./problems";
+import type { Difficulty, Problem } from "./problems";
 
 export interface QueueItem {
   id: string;
@@ -14,6 +14,7 @@ export interface DailyQueue {
   id: string;
   available_minutes: number;
   topic_focus_ids: string[];
+  difficulty_focus: Difficulty[];
   requested_problem_count: number | null;
   status: string;
   created_at: string;
@@ -33,6 +34,7 @@ async function json(response: Response): Promise<DailyQueue> {
 export async function generateQueue(input: {
   available_minutes: number;
   topic_focus_ids: string[];
+  difficulty_focus: Difficulty[];
   requested_problem_count: number | null;
 }): Promise<DailyQueue> {
   return json(
