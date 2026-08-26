@@ -63,3 +63,43 @@ def test_time_fitting_and_topic_balancing_are_deterministic() -> None:
         candidates[0].primary_topic_id,
         candidates[2].primary_topic_id,
     }
+
+
+def test_overdue_problems_do_not_bypass_topic_balancing() -> None:
+    arrays_id = uuid.uuid4()
+    graph_id = uuid.uuid4()
+    candidates = [
+        score_problem(
+            problem(
+                "Array overdue 1",
+                difficulty=Difficulty.EASY,
+                due_offset=-10,
+                topic="Arrays",
+                topic_id=arrays_id,
+            ),
+            date(2026, 7, 28),
+        ),
+        score_problem(
+            problem(
+                "Array overdue 2",
+                difficulty=Difficulty.EASY,
+                due_offset=-9,
+                topic="Arrays",
+                topic_id=arrays_id,
+            ),
+            date(2026, 7, 28),
+        ),
+        score_problem(
+            problem(
+                "Graph new",
+                difficulty=Difficulty.EASY,
+                topic="Graphs",
+                topic_id=graph_id,
+            ),
+            date(2026, 7, 28),
+        ),
+    ]
+
+    selected = select_candidates(candidates, available_minutes=40, requested_count=None)
+
+    assert [item.problem.title for item in selected] == ["Array overdue 1", "Graph new"]

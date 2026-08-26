@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from datetime import date
 
-from codemuscle.domain.enums import AttemptOutcome, Difficulty, MasteryState
+from codemuscle.domain.defaults import DEFAULT_PROBLEM_DURATION_MINUTES
+from codemuscle.domain.enums import AttemptOutcome, MasteryState
 from codemuscle.infrastructure.database.models import Problem
 
 SCORE_WEIGHTS = {
@@ -12,12 +13,6 @@ SCORE_WEIGHTS = {
     "priority": 5.0,
     "neglect_day": 0.5,
 }
-DURATION_DEFAULTS = {
-    Difficulty.EASY: 20,
-    Difficulty.MEDIUM: 35,
-    Difficulty.HARD: 50,
-    Difficulty.UNKNOWN: 30,
-}
 
 
 @dataclass(frozen=True)
@@ -27,19 +22,16 @@ class Candidate:
     duration: int
     reasons: list[str]
     primary_topic_id: str | None
-    severe: bool
 
 
 def score_problem(problem: Problem, today: date) -> Candidate:
     score = problem.priority * SCORE_WEIGHTS["priority"]
     reasons = [f"Priority {problem.priority} problem"]
-    severe = False
     if problem.next_revision_date is not None:
         overdue = (today - problem.next_revision_date).days
         if overdue > 0:
             score += min(overdue, 30) * SCORE_WEIGHTS["overdue_day"]
             reasons.insert(0, f"Overdue by {overdue} day{'s' if overdue != 1 else ''}")
-            severe = overdue >= 3
         elif overdue == 0:
             score += SCORE_WEIGHTS["due_today"]
             reasons.insert(0, "Due today")
@@ -47,7 +39,6 @@ def score_problem(problem: Problem, today: date) -> Candidate:
     if latest is not None and latest.outcome == AttemptOutcome.FAILED:
         score += SCORE_WEIGHTS["previous_failure"]
         reasons.insert(0, "Previous attempt failed")
-        severe = True
     if problem.current_mastery_state in {MasteryState.FRAGILE, MasteryState.NEEDS_RELEARNING}:
         score += SCORE_WEIGHTS["fragile"]
         reasons.append(
@@ -60,9 +51,12 @@ def score_problem(problem: Problem, today: date) -> Candidate:
             reasons.append(f"Not practiced for {neglected} days")
     elif problem.total_attempts == 0:
         reasons.append("Not practiced yet")
-    duration = problem.estimated_duration_minutes or DURATION_DEFAULTS[problem.difficulty]
+    duration = (
+        problem.estimated_duration_minutes
+        or DEFAULT_PROBLEM_DURATION_MINUTES[problem.difficulty]
+    )
     primary_topic = str(problem.topics[0].id) if problem.topics else None
-    return Candidate(problem, score, duration, reasons, primary_topic, severe)
+    return Candidate(problem, score, duration, reasons, primary_topic)
 
 
 def select_candidates(
@@ -71,8 +65,6 @@ def select_candidates(
     ordered = sorted(
         candidates, key=lambda item: (-item.score, item.problem.title, str(item.problem.id))
     )
-    severe = [item for item in ordered if item.severe]
-    regular = [item for item in ordered if not item.severe]
     selected: list[Candidate] = []
     used_topics: set[str] = set()
     total = 0
@@ -87,12 +79,10 @@ def select_candidates(
             if item.primary_topic_id:
                 used_topics.add(item.primary_topic_id)
 
-    for item in severe:
-        try_add(item)
-    for item in regular:
+    for item in ordered:
         if item.primary_topic_id is None or item.primary_topic_id not in used_topics:
             try_add(item)
-    for item in regular:
+    for item in ordered:
         if item not in selected:
             try_add(item)
     return selected

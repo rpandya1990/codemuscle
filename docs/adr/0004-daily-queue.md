@@ -13,8 +13,9 @@ and support user edits. Recalculating old queues would erase why a recommendatio
 
 Use a centralized deterministic scoring policy and greedy time fitter. Score overdue dates, previous
 failure, fragile/relearning mastery, due-today status, priority, and neglect. Use explicit duration
-defaults by difficulty. Select severe-risk items first, then prefer unused topics, then fill remaining
-capacity without exceeding the time budget.
+defaults by difficulty. Prefer unused topics first, then fill remaining capacity by score without
+exceeding the time budget. Overdue and failed problems keep their score bonuses but receive no
+special pass that bypasses topic diversity.
 
 Persist queue sessions and item snapshots including duration, score, reasons, position, and status.
 Remove/postpone/complete mutate status instead of deleting history. Replacement selects the best

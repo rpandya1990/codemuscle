@@ -2,6 +2,8 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field, field_validator
 
+from codemuscle.domain.defaults import DEFAULT_SUCCESS_INTERVALS
+
 
 class SettingsResponse(BaseModel):
     workspace_path: Path | None
@@ -9,7 +11,9 @@ class SettingsResponse(BaseModel):
     web_origin: str
     default_available_minutes: int = 60
     timezone: str = "UTC"
-    successful_intervals: list[int] = Field(default_factory=lambda: [1, 3, 7, 14, 30, 60])
+    successful_intervals: list[int] = Field(
+        default_factory=lambda: list(DEFAULT_SUCCESS_INTERVALS)
+    )
 
 
 class SettingsUpdateRequest(BaseModel):

@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import JSON, DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
+from codemuscle.domain.defaults import DEFAULT_SUCCESS_INTERVALS
 from codemuscle.infrastructure.database.base import Base
 
 
@@ -15,7 +16,7 @@ class UserPreference(Base):
     timezone: Mapped[str] = mapped_column(String(100), default="UTC", nullable=False)
     default_available_minutes: Mapped[int] = mapped_column(Integer, default=60, nullable=False)
     successful_intervals: Mapped[list[int]] = mapped_column(
-        JSON, default=lambda: [1, 3, 7, 14, 30, 60], nullable=False
+        JSON, default=lambda: list(DEFAULT_SUCCESS_INTERVALS), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

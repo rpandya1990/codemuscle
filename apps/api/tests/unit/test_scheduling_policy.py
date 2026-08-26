@@ -6,6 +6,7 @@ from hypothesis import strategies as st
 
 from codemuscle.application.scheduling.policy import calculate_schedule
 from codemuscle.application.scheduling.schemas import SchedulingResult
+from codemuscle.domain.defaults import DEFAULT_SUCCESS_INTERVALS
 from codemuscle.domain.enums import AttemptOutcome, Difficulty, HintUsage, MasteryState
 
 
@@ -25,7 +26,7 @@ def schedule(
         difficulty=Difficulty.MEDIUM,
         confidence=confidence,
         priority=3,
-        intervals=[1, 3, 7, 14, 30, 60],
+        intervals=list(DEFAULT_SUCCESS_INTERVALS),
     )
 
 
@@ -34,9 +35,9 @@ def schedule(
     [
         (AttemptOutcome.FAILED, MasteryState.NEEDS_RELEARNING, 1, 0),
         (AttemptOutcome.UNDERSTOOD_AFTER_SOLUTION, MasteryState.LEARNING, 1, 0),
-        (AttemptOutcome.SOLVED_SIGNIFICANT_HELP, MasteryState.LEARNING, 1, 0),
-        (AttemptOutcome.SOLVED_SMALL_HINT, MasteryState.FRAGILE, 1, 1),
-        (AttemptOutcome.SOLVED_INDEPENDENTLY, MasteryState.LEARNING, 1, 1),
+        (AttemptOutcome.SOLVED_SIGNIFICANT_HELP, MasteryState.LEARNING, 3, 0),
+        (AttemptOutcome.SOLVED_SMALL_HINT, MasteryState.FRAGILE, 3, 1),
+        (AttemptOutcome.SOLVED_INDEPENDENTLY, MasteryState.LEARNING, 3, 1),
     ],
 )
 def test_baseline_policy(

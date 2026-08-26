@@ -3,8 +3,6 @@ from datetime import date, timedelta
 from codemuscle.application.scheduling.schemas import SchedulingResult
 from codemuscle.domain.enums import AttemptOutcome, Difficulty, HintUsage, MasteryState
 
-DEFAULT_SUCCESS_INTERVALS = [1, 3, 7, 14, 30, 60]
-
 
 def calculate_schedule(
     *,

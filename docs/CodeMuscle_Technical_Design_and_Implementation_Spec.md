@@ -598,7 +598,7 @@ A queue item should store the recommendation reason as generated at that time, r
 Use approximately:
 
 ```text
-1, 3, 7, 14, 30, 60 days
+3, 10, 30, 90, 180, 365 days
 ```
 
 Represent these intervals in configuration rather than hardcoding them throughout the code.
@@ -740,10 +740,10 @@ Use:
 
 Example defaults:
 
-- Easy: 20 minutes
-- Medium: 35 minutes
-- Hard: 50 minutes
-- Unknown: 30 minutes
+- Easy: 15 minutes
+- Medium: 25 minutes
+- Hard: 30 minutes
+- Unknown: 20 minutes
 
 The generated queue should fit the available time as closely as possible without substantially exceeding it.
 
@@ -754,8 +754,8 @@ A simple greedy algorithm is acceptable for v1 if it is deterministic and tested
 Unless a topic focus is explicitly requested:
 
 - Avoid selecting every problem from the same topic.
-- Prefer diversity after the highest-risk items are included.
-- Do not sacrifice severely overdue or failed problems merely to force equal representation.
+- Prefer topic diversity before filling remaining capacity by score.
+- Keep overdue and failed problems highly scored, but do not let them bypass topic balancing.
 
 ### 10.6 Recommendation explanations
 

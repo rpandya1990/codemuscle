@@ -13,7 +13,7 @@ confidence, priority, and manual overrides affect scheduling. Rules must be test
 
 Put all scheduling logic in a pure policy receiving an explicit attempt date, current summary, problem
 attributes, and configured successful intervals. Return a typed result with effective calculation date,
-mastery, streak, factors, and explanation. Default intervals are `1,3,7,14,30,60` days.
+mastery, streak, factors, and explanation. Default intervals are `3,10,30,90,180,365` days.
 
 Attempt creation stores the result and atomically updates the problem. A new attempt clears an older
 manual date override. Manual overrides alter only the effective date and retain the latest calculated

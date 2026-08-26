@@ -9,10 +9,8 @@ from codemuscle.application.attempts.schemas import (
     AttemptResponse,
     RecentAttemptResponse,
 )
-from codemuscle.application.scheduling.policy import (
-    DEFAULT_SUCCESS_INTERVALS,
-    calculate_schedule,
-)
+from codemuscle.application.scheduling.policy import calculate_schedule
+from codemuscle.domain.defaults import DEFAULT_SUCCESS_INTERVALS
 from codemuscle.domain.exceptions import ProblemNotFoundError
 from codemuscle.infrastructure.database.models import Attempt, Problem, UserPreference
 
@@ -37,7 +35,9 @@ class AttemptService:
             confidence=data.confidence,
             priority=problem.priority,
             intervals=(
-                preference.successful_intervals if preference else DEFAULT_SUCCESS_INTERVALS
+                preference.successful_intervals
+                if preference
+                else list(DEFAULT_SUCCESS_INTERVALS)
             ),
         )
         attempt = Attempt(

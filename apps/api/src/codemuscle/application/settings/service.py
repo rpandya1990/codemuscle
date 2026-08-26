@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from codemuscle.application.settings.schemas import SettingsResponse, SettingsUpdateRequest
 from codemuscle.config import Settings
+from codemuscle.domain.defaults import DEFAULT_SUCCESS_INTERVALS
 from codemuscle.infrastructure.database.models.settings import UserPreference
 
 
@@ -27,7 +28,9 @@ class SettingsService:
             default_available_minutes=(preference.default_available_minutes if preference else 60),
             timezone=preference.timezone if preference else "UTC",
             successful_intervals=(
-                preference.successful_intervals if preference else [1, 3, 7, 14, 30, 60]
+                preference.successful_intervals
+                if preference
+                else list(DEFAULT_SUCCESS_INTERVALS)
             ),
         )
 

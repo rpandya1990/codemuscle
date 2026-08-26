@@ -69,7 +69,7 @@ sequenceDiagram
 - Low confidence, hard difficulty, and priority 5 may shorten—but never lengthen—the base interval.
 - Every calculation stores a plain-language explanation. Identical inputs are deterministic.
 
-Default successful intervals are `1, 3, 7, 14, 30, 60` days and can be updated through settings.
+Default successful intervals are `3, 10, 30, 90, 180, 365` days and can be updated through settings.
 
 ## Manual revision-date override — implemented
 
@@ -105,7 +105,7 @@ sequenceDiagram
     W->>A: POST /queues
     S->>D: Load active candidate problems and attempts
     S->>P: Score candidates
-    P->>P: Preserve severe risk, diversify topics, greedily fit time
+    P->>P: Diversify topics, then greedily fill by score
     P-->>S: Selected candidates with score/duration/reasons
     S->>D: Persist session and items
     S-->>W: Explainable queue

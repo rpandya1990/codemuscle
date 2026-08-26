@@ -10,7 +10,7 @@ All mastery and revision-date calculations live in a pure scheduling policy. The
 the attempt, current problem summary, and configured successful intervals and returns a typed result
 containing the next date, mastery, streak, explanation, and factors.
 
-Successful intervals default to `1, 3, 7, 14, 30, 60` days and are stored in user preferences.
+Successful intervals default to `3, 10, 30, 90, 180, 365` days and are stored in user preferences.
 Confidence, hard difficulty, and highest priority may shorten an interval, but never below one day.
 Attempt recording applies the result atomically and clears an existing manual date override.
 
