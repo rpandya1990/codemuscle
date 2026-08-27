@@ -32,8 +32,6 @@ def test_attempts_are_immutable_history_and_update_summary(session: Session) -> 
             outcome=AttemptOutcome.SOLVED_INDEPENDENTLY,
             hint_usage=HintUsage.NONE,
             time_spent_minutes=18,
-            confidence=4,
-            complexity_understood=True,
         ),
     )
     second = service.create(

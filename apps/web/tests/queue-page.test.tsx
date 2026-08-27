@@ -87,10 +87,6 @@ describe("QueuePage", () => {
     fireEvent.change(screen.getByRole("combobox", { name: "Hint usage" }), {
       target: { value: "SMALL" },
     });
-    fireEvent.change(
-      screen.getByRole("spinbutton", { name: "Confidence (1–5)" }),
-      { target: { value: "4" } },
-    );
     fireEvent.click(
       screen.getByRole("button", { name: "Record attempt and complete" }),
     );
@@ -100,9 +96,7 @@ describe("QueuePage", () => {
         outcome: "SOLVED_SMALL_HINT",
         hint_usage: "SMALL",
         time_spent_minutes: null,
-        confidence: 4,
         notes: null,
-        complexity_understood: null,
       }),
     );
     expect(updateQueueItem).toHaveBeenCalledWith(

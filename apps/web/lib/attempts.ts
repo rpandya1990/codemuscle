@@ -16,9 +16,7 @@ export interface Attempt {
   outcome: AttemptOutcome;
   hint_usage: HintUsage;
   time_spent_minutes: number | null;
-  confidence: number | null;
   notes: string | null;
-  complexity_understood: boolean | null;
   previous_mastery_state: string;
   calculated_mastery_state: string;
   calculated_next_revision_date: string;
@@ -41,9 +39,7 @@ export async function createAttempt(
     outcome: AttemptOutcome;
     hint_usage: HintUsage;
     time_spent_minutes: number | null;
-    confidence: number | null;
     notes: string | null;
-    complexity_understood: boolean | null;
   },
 ): Promise<Attempt> {
   const response = await fetch(`${API_URL}/problems/${problemId}/attempts`, {

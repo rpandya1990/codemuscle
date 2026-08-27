@@ -15,7 +15,8 @@ def schedule(
     *,
     streak: int = 0,
     hint: HintUsage = HintUsage.NONE,
-    confidence: int | None = None,
+    difficulty: Difficulty = Difficulty.MEDIUM,
+    priority: int = 3,
 ) -> SchedulingResult:
     return calculate_schedule(
         attempted_on=date(2026, 7, 28),
@@ -23,9 +24,8 @@ def schedule(
         hint_usage=hint,
         previous_mastery=MasteryState.NEW,
         successful_streak=streak,
-        difficulty=Difficulty.MEDIUM,
-        confidence=confidence,
-        priority=3,
+        difficulty=difficulty,
+        priority=priority,
         intervals=list(DEFAULT_SUCCESS_INTERVALS),
     )
 
@@ -33,11 +33,11 @@ def schedule(
 @pytest.mark.parametrize(
     ("outcome", "mastery", "days", "streak"),
     [
-        (AttemptOutcome.FAILED, MasteryState.NEEDS_RELEARNING, 1, 0),
-        (AttemptOutcome.UNDERSTOOD_AFTER_SOLUTION, MasteryState.LEARNING, 1, 0),
-        (AttemptOutcome.SOLVED_SIGNIFICANT_HELP, MasteryState.LEARNING, 3, 0),
-        (AttemptOutcome.SOLVED_SMALL_HINT, MasteryState.FRAGILE, 3, 1),
-        (AttemptOutcome.SOLVED_INDEPENDENTLY, MasteryState.LEARNING, 3, 1),
+        (AttemptOutcome.FAILED, MasteryState.NEEDS_RELEARNING, 7, 0),
+        (AttemptOutcome.UNDERSTOOD_AFTER_SOLUTION, MasteryState.LEARNING, 14, 0),
+        (AttemptOutcome.SOLVED_SIGNIFICANT_HELP, MasteryState.LEARNING, 30, 0),
+        (AttemptOutcome.SOLVED_SMALL_HINT, MasteryState.FRAGILE, 60, 1),
+        (AttemptOutcome.SOLVED_INDEPENDENTLY, MasteryState.LEARNING, 274, 1),
     ],
 )
 def test_baseline_policy(
@@ -63,6 +63,37 @@ def test_independent_success_never_shortens_interval(streak: int) -> None:
     assert following.next_revision_date >= current.next_revision_date
 
 
-def test_low_confidence_modifier_is_explained() -> None:
-    result = schedule(AttemptOutcome.SOLVED_INDEPENDENTLY, streak=3, confidence=1)
-    assert "Shortened for low confidence" in result.factors
+@pytest.mark.parametrize(
+    ("difficulty", "days"),
+    [
+        (Difficulty.EASY, 365),
+        (Difficulty.MEDIUM, 274),
+        (Difficulty.HARD, 183),
+    ],
+)
+def test_independent_solve_uses_difficulty(difficulty: Difficulty, days: int) -> None:
+    result = schedule(
+        AttemptOutcome.SOLVED_INDEPENDENTLY,
+        difficulty=difficulty,
+    )
+    assert (result.next_revision_date - date(2026, 7, 28)).days == days
+
+
+def test_medium_small_hint_is_scheduled_in_sixty_days() -> None:
+    result = schedule(
+        AttemptOutcome.SOLVED_SMALL_HINT,
+        hint=HintUsage.SMALL,
+        difficulty=Difficulty.MEDIUM,
+    )
+    assert (result.next_revision_date - date(2026, 7, 28)).days == 60
+
+
+def test_hard_and_high_priority_modifiers_stack() -> None:
+    result = schedule(
+        AttemptOutcome.SOLVED_INDEPENDENTLY,
+        difficulty=Difficulty.HARD,
+        priority=5,
+    )
+    assert (result.next_revision_date - date(2026, 7, 28)).days == 146
+    assert "Shortened 25% for hard difficulty" not in result.factors
+    assert "Shortened 20% for high priority" in result.factors

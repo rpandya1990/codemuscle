@@ -18,9 +18,6 @@ class Attempt(Base):
         CheckConstraint(
             "time_spent_minutes IS NULL OR time_spent_minutes >= 0", name="nonnegative_time_spent"
         ),
-        CheckConstraint(
-            "confidence IS NULL OR confidence BETWEEN 1 AND 5", name="confidence_range"
-        ),
         Index("ix_attempts_problem_attempted", "problem_id", "attempted_at"),
     )
 
@@ -36,9 +33,7 @@ class Attempt(Base):
         Enum(HintUsage, name="hint_usage"), nullable=False
     )
     time_spent_minutes: Mapped[int | None] = mapped_column(Integer)
-    confidence: Mapped[int | None] = mapped_column(Integer)
     notes: Mapped[str | None] = mapped_column(Text)
-    complexity_understood: Mapped[bool | None]
     previous_mastery_state: Mapped[MasteryState] = mapped_column(
         Enum(MasteryState, name="mastery_state", create_type=False), nullable=False
     )

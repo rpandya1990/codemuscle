@@ -104,9 +104,7 @@ Purpose: immutable chronological practice events and a snapshot of each scheduli
 | `outcome` | enum | no | Independent/small hint/significant help/understood/failed/skipped |
 | `hint_usage` | enum | no | None/small/significant/solution/not applicable |
 | `time_spent_minutes` | integer | yes | Check: nonnegative |
-| `confidence` | integer | yes | Check: 1–5 |
 | `notes` | text | yes | Attempt-specific notes |
-| `complexity_understood` | boolean | yes | Optional supporting detail |
 | `previous_mastery_state` | enum | no | State before event |
 | `calculated_mastery_state` | enum | no | Policy result |
 | `previous_revision_date` | date | yes | Effective date before event |

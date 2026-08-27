@@ -47,8 +47,8 @@ sequenceDiagram
     U->>W: Enter outcome and supporting details
     W->>A: POST /problems/{id}/attempts
     A->>S: Validated AttemptCreate
-    S->>D: Load problem and interval preferences
-    S->>P: Outcome, hints, streak, difficulty, confidence, priority
+    S->>D: Load problem
+    S->>P: Outcome, hints, streak, difficulty, priority
     P-->>S: Date, mastery, streak, explanation, factors
     S->>D: Insert immutable attempt
     S->>D: Update problem summary and clear manual date override
@@ -60,16 +60,19 @@ sequenceDiagram
 
 ### Scheduling rules
 
-- `FAILED`: streak 0, `NEEDS_RELEARNING`, one day.
-- `UNDERSTOOD_AFTER_SOLUTION`: streak 0, `LEARNING`, one day.
-- Significant help: streak 0, `LEARNING`, short interval.
-- Small hint: increment streak cautiously, `FRAGILE`, hold interval back one stage.
+- `FAILED`: streak 0, `NEEDS_RELEARNING`, 7 days.
+- `UNDERSTOOD_AFTER_SOLUTION`: streak 0, `LEARNING`, 14 days.
+- Significant help: streak 0, `LEARNING`, 30 days.
+- Small hint: increment streak cautiously, `FRAGILE`, 60 days.
 - Independent solve: increment streak and progress `LEARNING` → `RETAINED` → `MASTERED`.
-- Skipped: preserve mastery/streak and keep due soon.
-- Low confidence, hard difficulty, and priority 5 may shorten—but never lengthen—the base interval.
+- Independent solves without hints use the configured long-term interval. Medium/unknown difficulty
+  reduces it by 25%, and hard difficulty reduces it by 50%.
+- Skipped: preserve mastery/streak and schedule in 14 days.
+- Hard difficulty shortens hint-assisted and unsuccessful baselines by 25%; priority 5 shortens any
+  result by a further 20%.
 - Every calculation stores a plain-language explanation. Identical inputs are deterministic.
 
-Default successful intervals are `3, 10, 30, 90, 180, 365` days and can be updated through settings.
+The largest configured successful interval is the long-term baseline for independent solves.
 
 ## Manual revision-date override — implemented
 

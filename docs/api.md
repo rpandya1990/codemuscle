@@ -86,14 +86,12 @@ summary. Request:
   "outcome": "SOLVED_INDEPENDENTLY",
   "hint_usage": "NONE",
   "time_spent_minutes": 25,
-  "confidence": 4,
-  "notes": "Remember empty input",
-  "complexity_understood": true
+  "notes": "Remember empty input"
 }
 ```
 
 Required: `outcome`. `hint_usage` defaults to `NOT_APPLICABLE`; `attempted_at` defaults to now.
-Time is 0–1440 and confidence 1–5. Returns `201 Attempt`, including previous/calculated mastery,
+Time is 0–1440. Returns `201 Attempt`, including previous/calculated mastery,
 calculated next date, and explanation. Errors: 404 problem; 422 validation.
 
 | Method and URL | Purpose | Response |

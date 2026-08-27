@@ -462,9 +462,7 @@ Fields:
 - `outcome`
 - `hint_usage`
 - `time_spent_minutes`
-- `confidence`
 - `notes`
-- `complexity_understood`
 - `previous_mastery_state`
 - `calculated_mastery_state`
 - `previous_revision_date`
@@ -574,7 +572,7 @@ import_jobs 1 --- N import_rows
 - Index on `queue_items.queue_session_id, queue_items.position`
 - Unique or partial indexes for platform identifiers where reliable
 - PostgreSQL trigram index on normalized problem title for duplicate detection
-- Check constraints for priority, confidence, and duration ranges
+- Check constraints for priority and duration ranges
 
 ### 8.4 Queue persistence
 
@@ -593,15 +591,21 @@ A queue item should store the recommendation reason as generated at that time, r
 
 ## 9. Scheduling engine
 
-### 9.1 Default successful intervals
+### 9.1 Outcome-based revision intervals
 
-Use approximately:
+Use these broad-coverage baselines:
 
 ```text
-3, 10, 30, 90, 180, 365 days
+failed: 7 days
+understood after solution or skipped: 14 days
+significant help: 30 days
+small hint: 60 days
+independent without hints: the configured long-term interval, reduced 25% for medium/unknown and 50%
+for hard
 ```
 
-Represent these intervals in configuration rather than hardcoding them throughout the code.
+Hard difficulty shortens hint-assisted and unsuccessful baselines by 25%, and priority 5 shortens
+the result by a further 20%.
 
 ### 9.2 Scheduling inputs
 
@@ -611,7 +615,6 @@ The scheduling service must consider:
 - Hint usage
 - Continuous successful revisions
 - Difficulty
-- Confidence
 - User priority
 - Existing manual override state
 
@@ -637,25 +640,25 @@ Suggested baseline:
 - `FAILED`
   - Reset successful streak to `0`
   - Move state to `NEEDS_RELEARNING`
-  - Schedule in `1 day`
+  - Schedule in `7 days`
 
 - `UNDERSTOOD_AFTER_SOLUTION`
   - Reset or keep streak at `0`
   - Move state to `LEARNING`
-  - Schedule in `1 day`
+  - Schedule in `14 days`
 
 - `SOLVED_SIGNIFICANT_HELP`
   - Do not advance more than one stage
   - State is `LEARNING` or `FRAGILE`
-  - Schedule in `1–3 days`
+  - Schedule in `30 days`
 
 - `SOLVED_SMALL_HINT`
   - Advance cautiously
-  - Schedule using the current or next lower successful interval
+  - Schedule in `60 days`
 
 - `SOLVED_INDEPENDENTLY`
   - Increase successful streak
-  - Advance to the next successful interval
+  - Use the configured long-term interval, reduced 25% for medium/unknown or 50% for hard
   - Promote mastery state according to streak
 
 - `SKIPPED`
@@ -663,7 +666,7 @@ Suggested baseline:
   - Keep the problem due soon
   - Do not incorrectly penalize mastery as a failed attempt unless product rules later specify it
 
-Difficulty, confidence, and priority may adjust the interval within bounded, documented rules.
+Difficulty and priority may adjust the interval within bounded, documented rules.
 
 ### 9.5 Explainability requirement
 

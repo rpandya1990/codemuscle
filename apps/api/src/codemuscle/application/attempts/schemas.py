@@ -13,9 +13,7 @@ class AttemptCreate(BaseModel):
     outcome: AttemptOutcome
     hint_usage: HintUsage = HintUsage.NOT_APPLICABLE
     time_spent_minutes: int | None = Field(default=None, ge=0, le=1440)
-    confidence: int | None = Field(default=None, ge=1, le=5)
     notes: str | None = None
-    complexity_understood: bool | None = None
 
 
 class AttemptResponse(BaseModel):
@@ -27,9 +25,7 @@ class AttemptResponse(BaseModel):
     outcome: AttemptOutcome
     hint_usage: HintUsage
     time_spent_minutes: int | None
-    confidence: int | None
     notes: str | None
-    complexity_understood: bool | None
     previous_mastery_state: MasteryState
     calculated_mastery_state: MasteryState
     calculated_next_revision_date: date

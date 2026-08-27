@@ -1,7 +1,14 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import ProblemsPage from "../app/problems/page";
+import { createAttempt } from "../lib/attempts";
 import { fetchProblems } from "../lib/problems";
 
 vi.mock("../lib/problems", () => ({
@@ -177,5 +184,61 @@ describe("ProblemsPage", () => {
         name: "No problem link available for Problem without link",
       }),
     ).toHaveClass("text-slate-300");
+  });
+
+  it("resets the attempt form after an asynchronous submission", async () => {
+    vi.mocked(fetchProblems).mockReset().mockResolvedValue({
+      items: [
+        {
+          id: "reverse-integer",
+          title: "Reverse Integer",
+          url: null,
+          platform: null,
+          difficulty: "MEDIUM",
+          notes: null,
+          priority: 3,
+          total_attempts: 0,
+          successful_revision_streak: 0,
+          next_revision_date: null,
+          calculated_next_revision_date: null,
+          next_revision_overridden: false,
+          current_mastery_state: "NEW",
+          archived_at: null,
+          topics: [],
+          patterns: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 5000,
+    });
+    vi.mocked(createAttempt).mockResolvedValueOnce({} as never);
+
+    render(<ProblemsPage />);
+    const problemCard = (await screen.findByText("Reverse Integer")).closest(
+      "li",
+    );
+    expect(problemCard).not.toBeNull();
+    fireEvent.click(
+      within(problemCard as HTMLElement).getByRole("button", {
+        name: "Record attempt",
+      }),
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Record attempt",
+    });
+    const timeSpent = within(dialog).getByRole("spinbutton", {
+      name: "Time spent (minutes)",
+    });
+    fireEvent.change(timeSpent, { target: { value: "5" } });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Record attempt" }),
+    );
+
+    await waitFor(() => expect(timeSpent).toHaveValue(null));
+    expect(createAttempt).toHaveBeenCalledWith(
+      "reverse-integer",
+      expect.objectContaining({ time_spent_minutes: 5 }),
+    );
   });
 });

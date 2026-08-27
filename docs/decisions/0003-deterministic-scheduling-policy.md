@@ -11,7 +11,7 @@ the attempt, current problem summary, and configured successful intervals and re
 containing the next date, mastery, streak, explanation, and factors.
 
 Successful intervals default to `3, 10, 30, 90, 180, 365` days and are stored in user preferences.
-Confidence, hard difficulty, and highest priority may shorten an interval, but never below one day.
+Hard difficulty and highest priority may shorten an interval, but never below one day.
 Attempt recording applies the result atomically and clears an existing manual date override.
 
 Manual overrides change only the effective next revision date. The latest calculated date remains

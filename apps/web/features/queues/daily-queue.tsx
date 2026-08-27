@@ -91,9 +91,6 @@ export function DailyQueue() {
     event.preventDefault();
     if (!queue || !completingItem) return;
     const form = new FormData(event.currentTarget);
-    const complexityUnderstood = String(
-      form.get("complexity_understood") ?? "",
-    );
     setWorking(true);
     try {
       if (attemptRecordedForItemId !== completingItem.id) {
@@ -103,13 +100,7 @@ export function DailyQueue() {
           time_spent_minutes: form.get("time_spent_minutes")
             ? Number(form.get("time_spent_minutes"))
             : null,
-          confidence: form.get("confidence")
-            ? Number(form.get("confidence"))
-            : null,
           notes: String(form.get("notes") ?? "").trim() || null,
-          complexity_understood: complexityUnderstood
-            ? complexityUnderstood === "yes"
-            : null,
         });
         setAttemptRecordedForItemId(completingItem.id);
       }
@@ -416,28 +407,6 @@ export function DailyQueue() {
                   name="time_spent_minutes"
                   className="field-control"
                 />
-              </label>
-              <label className="field-label">
-                Confidence (1–5)
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  name="confidence"
-                  className="field-control"
-                />
-              </label>
-              <label className="field-label">
-                Complexity understood
-                <select
-                  name="complexity_understood"
-                  className="field-control"
-                  defaultValue=""
-                >
-                  <option value="">Not recorded</option>
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
               </label>
               <label className="field-label sm:col-span-2">
                 Notes

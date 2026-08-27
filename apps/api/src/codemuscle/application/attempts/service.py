@@ -32,12 +32,9 @@ class AttemptService:
             previous_mastery=problem.current_mastery_state,
             successful_streak=problem.successful_revision_streak,
             difficulty=problem.difficulty,
-            confidence=data.confidence,
             priority=problem.priority,
             intervals=(
-                preference.successful_intervals
-                if preference
-                else list(DEFAULT_SUCCESS_INTERVALS)
+                preference.successful_intervals if preference else list(DEFAULT_SUCCESS_INTERVALS)
             ),
         )
         attempt = Attempt(
@@ -46,9 +43,7 @@ class AttemptService:
             outcome=data.outcome,
             hint_usage=data.hint_usage,
             time_spent_minutes=data.time_spent_minutes,
-            confidence=data.confidence,
             notes=data.notes or None,
-            complexity_understood=data.complexity_understood,
             previous_mastery_state=problem.current_mastery_state,
             calculated_mastery_state=schedule.mastery_state,
             previous_revision_date=problem.next_revision_date,

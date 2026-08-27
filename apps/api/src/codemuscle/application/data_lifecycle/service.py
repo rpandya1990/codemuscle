@@ -306,7 +306,6 @@ class DataLifecycleService:
                             "outcome": attempt.outcome,
                             "hint_usage": attempt.hint_usage,
                             "time_spent_minutes": attempt.time_spent_minutes,
-                            "confidence": attempt.confidence,
                             "notes": attempt.notes,
                             "schedule_explanation": attempt.schedule_explanation,
                         }
@@ -379,7 +378,6 @@ class DataLifecycleService:
                 "Outcome",
                 "Hint usage",
                 "Minutes",
-                "Confidence",
                 "Notes",
                 "Explanation",
             ]
@@ -406,7 +404,6 @@ class DataLifecycleService:
                         attempt.outcome.value,
                         attempt.hint_usage.value,
                         attempt.time_spent_minutes,
-                        attempt.confidence,
                         attempt.notes,
                         attempt.schedule_explanation,
                     ]
