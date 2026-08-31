@@ -460,7 +460,6 @@ Fields:
 - `problem_id`
 - `attempted_at`
 - `outcome`
-- `hint_usage`
 - `time_spent_minutes`
 - `notes`
 - `previous_mastery_state`
@@ -495,17 +494,7 @@ Use an enum:
 - `FAILED`
 - `SKIPPED`
 
-### 7.7 Hint usage
-
-Use an enum:
-
-- `NONE`
-- `SMALL`
-- `SIGNIFICANT`
-- `SOLUTION_VIEWED`
-- `NOT_APPLICABLE`
-
-### 7.8 Difficulty
+### 7.7 Difficulty
 
 Use an enum initially:
 
@@ -600,7 +589,7 @@ failed: 7 days
 understood after solution or skipped: 14 days
 significant help: 30 days
 small hint: 60 days
-independent without hints: the configured long-term interval, reduced 25% for medium/unknown and 50%
+solved independently: the configured long-term interval, reduced 25% for medium/unknown and 50%
 for hard
 ```
 
@@ -612,7 +601,6 @@ the result by a further 20%.
 The scheduling service must consider:
 
 - Attempt outcome
-- Hint usage
 - Continuous successful revisions
 - Difficulty
 - User priority

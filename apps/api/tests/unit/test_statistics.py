@@ -11,7 +11,7 @@ from codemuscle.application.problems.schemas import ProblemCreate
 from codemuscle.application.problems.service import ProblemService
 from codemuscle.application.statistics.policy import classify_area
 from codemuscle.application.statistics.service import StatisticsService
-from codemuscle.domain.enums import AttemptOutcome, HintUsage
+from codemuscle.domain.enums import AttemptOutcome
 from codemuscle.infrastructure.database.base import Base
 from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic  # noqa: F401
 
@@ -82,7 +82,6 @@ def test_dashboard_topic_pattern_and_trend_statistics(session: Session) -> None:
         AttemptCreate(
             attempted_at=datetime(2026, 7, 28, 10, tzinfo=UTC),
             outcome=AttemptOutcome.FAILED,
-            hint_usage=HintUsage.SOLUTION_VIEWED,
         ),
     )
     service = StatisticsService(session)

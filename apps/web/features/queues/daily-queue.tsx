@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-import { AttemptOutcome, createAttempt, HintUsage } from "@/lib/attempts";
+import { AttemptOutcome, createAttempt } from "@/lib/attempts";
 import {
   Difficulty,
   fetchProblems,
@@ -94,9 +94,9 @@ export function DailyQueue() {
     setWorking(true);
     try {
       if (attemptRecordedForItemId !== completingItem.id) {
+        const outcome = String(form.get("outcome")) as AttemptOutcome;
         await createAttempt(completingItem.problem.id, {
-          outcome: String(form.get("outcome")) as AttemptOutcome,
-          hint_usage: String(form.get("hint_usage")) as HintUsage,
+          outcome,
           time_spent_minutes: form.get("time_spent_minutes")
             ? Number(form.get("time_spent_minutes"))
             : null,
@@ -104,9 +104,7 @@ export function DailyQueue() {
         });
         setAttemptRecordedForItemId(completingItem.id);
       }
-      setQueue(
-        await updateQueueItem(queue.id, completingItem.id, "COMPLETED"),
-      );
+      setQueue(await updateQueueItem(queue.id, completingItem.id, "COMPLETED"));
       setCompletingItem(null);
       setAttemptRecordedForItemId(null);
       setError(null);
@@ -335,10 +333,7 @@ export function DailyQueue() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2
-                  id="queue-attempt-title"
-                  className="text-xl font-semibold"
-                >
+                <h2 id="queue-attempt-title" className="text-xl font-semibold">
                   Record attempt
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
@@ -385,20 +380,6 @@ export function DailyQueue() {
                 </select>
               </label>
               <label className="field-label">
-                Hint usage
-                <select
-                  name="hint_usage"
-                  className="field-control"
-                  defaultValue="NONE"
-                >
-                  <option value="NONE">None</option>
-                  <option value="SMALL">Small</option>
-                  <option value="SIGNIFICANT">Significant</option>
-                  <option value="SOLUTION_VIEWED">Solution viewed</option>
-                  <option value="NOT_APPLICABLE">Not applicable</option>
-                </select>
-              </label>
-              <label className="field-label">
                 Time spent (minutes)
                 <input
                   type="number"
@@ -416,10 +397,7 @@ export function DailyQueue() {
                   className="field-control resize-y"
                 />
               </label>
-              <button
-                disabled={working}
-                className="btn-primary sm:col-span-2"
-              >
+              <button disabled={working} className="btn-primary sm:col-span-2">
                 {working ? "Recording…" : "Record attempt and complete"}
               </button>
             </form>

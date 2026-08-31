@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from codemuscle.domain.enums import AttemptOutcome, HintUsage, MasteryState
+from codemuscle.domain.enums import AttemptOutcome, MasteryState
 
 
 class AttemptCreate(BaseModel):
@@ -11,7 +11,6 @@ class AttemptCreate(BaseModel):
 
     attempted_at: datetime | None = None
     outcome: AttemptOutcome
-    hint_usage: HintUsage = HintUsage.NOT_APPLICABLE
     time_spent_minutes: int | None = Field(default=None, ge=0, le=1440)
     notes: str | None = None
 
@@ -23,7 +22,6 @@ class AttemptResponse(BaseModel):
     problem_id: uuid.UUID
     attempted_at: datetime
     outcome: AttemptOutcome
-    hint_usage: HintUsage
     time_spent_minutes: int | None
     notes: str | None
     previous_mastery_state: MasteryState

@@ -7,21 +7,19 @@ from hypothesis import strategies as st
 from codemuscle.application.scheduling.policy import calculate_schedule
 from codemuscle.application.scheduling.schemas import SchedulingResult
 from codemuscle.domain.defaults import DEFAULT_SUCCESS_INTERVALS
-from codemuscle.domain.enums import AttemptOutcome, Difficulty, HintUsage, MasteryState
+from codemuscle.domain.enums import AttemptOutcome, Difficulty, MasteryState
 
 
 def schedule(
     outcome: AttemptOutcome,
     *,
     streak: int = 0,
-    hint: HintUsage = HintUsage.NONE,
     difficulty: Difficulty = Difficulty.MEDIUM,
     priority: int = 3,
 ) -> SchedulingResult:
     return calculate_schedule(
         attempted_on=date(2026, 7, 28),
         outcome=outcome,
-        hint_usage=hint,
         previous_mastery=MasteryState.NEW,
         successful_streak=streak,
         difficulty=difficulty,
@@ -82,7 +80,6 @@ def test_independent_solve_uses_difficulty(difficulty: Difficulty, days: int) ->
 def test_medium_small_hint_is_scheduled_in_sixty_days() -> None:
     result = schedule(
         AttemptOutcome.SOLVED_SMALL_HINT,
-        hint=HintUsage.SMALL,
         difficulty=Difficulty.MEDIUM,
     )
     assert (result.next_revision_date - date(2026, 7, 28)).days == 60

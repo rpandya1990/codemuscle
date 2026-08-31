@@ -6,15 +6,11 @@ export type AttemptOutcome =
   | "FAILED"
   | "SKIPPED";
 
-export type HintUsage =
-  "NONE" | "SMALL" | "SIGNIFICANT" | "SOLUTION_VIEWED" | "NOT_APPLICABLE";
-
 export interface Attempt {
   id: string;
   problem_id: string;
   attempted_at: string;
   outcome: AttemptOutcome;
-  hint_usage: HintUsage;
   time_spent_minutes: number | null;
   notes: string | null;
   previous_mastery_state: string;
@@ -37,7 +33,6 @@ export async function createAttempt(
   problemId: string,
   input: {
     outcome: AttemptOutcome;
-    hint_usage: HintUsage;
     time_spent_minutes: number | null;
     notes: string | null;
   },

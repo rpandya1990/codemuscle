@@ -304,7 +304,6 @@ class DataLifecycleService:
                         {
                             "attempted_at": attempt.attempted_at,
                             "outcome": attempt.outcome,
-                            "hint_usage": attempt.hint_usage,
                             "time_spent_minutes": attempt.time_spent_minutes,
                             "notes": attempt.notes,
                             "schedule_explanation": attempt.schedule_explanation,
@@ -376,7 +375,6 @@ class DataLifecycleService:
                 "Problem",
                 "Attempted at",
                 "Outcome",
-                "Hint usage",
                 "Minutes",
                 "Notes",
                 "Explanation",
@@ -402,7 +400,6 @@ class DataLifecycleService:
                         problem.title,
                         attempt.attempted_at.replace(tzinfo=None),
                         attempt.outcome.value,
-                        attempt.hint_usage.value,
                         attempt.time_spent_minutes,
                         attempt.notes,
                         attempt.schedule_explanation,

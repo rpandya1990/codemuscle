@@ -84,9 +84,9 @@ describe("QueuePage", () => {
     fireEvent.change(screen.getByRole("combobox", { name: "Outcome" }), {
       target: { value: "SOLVED_SMALL_HINT" },
     });
-    fireEvent.change(screen.getByRole("combobox", { name: "Hint usage" }), {
-      target: { value: "SMALL" },
-    });
+    expect(
+      screen.queryByRole("combobox", { name: "Hint usage" }),
+    ).not.toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", { name: "Record attempt and complete" }),
     );
@@ -94,7 +94,6 @@ describe("QueuePage", () => {
     await waitFor(() =>
       expect(createAttempt).toHaveBeenCalledWith("problem-1", {
         outcome: "SOLVED_SMALL_HINT",
-        hint_usage: "SMALL",
         time_spent_minutes: null,
         notes: null,
       }),

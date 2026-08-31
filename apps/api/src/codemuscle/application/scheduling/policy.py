@@ -2,14 +2,13 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
 from codemuscle.application.scheduling.schemas import SchedulingResult
-from codemuscle.domain.enums import AttemptOutcome, Difficulty, HintUsage, MasteryState
+from codemuscle.domain.enums import AttemptOutcome, Difficulty, MasteryState
 
 
 def calculate_schedule(
     *,
     attempted_on: date,
     outcome: AttemptOutcome,
-    hint_usage: HintUsage,
     previous_mastery: MasteryState,
     successful_streak: int,
     difficulty: Difficulty,
@@ -17,24 +16,18 @@ def calculate_schedule(
     intervals: list[int],
 ) -> SchedulingResult:
     factors = [f"Outcome: {outcome.value.replace('_', ' ').lower()}"]
-    independent_without_hints = outcome == AttemptOutcome.SOLVED_INDEPENDENTLY and hint_usage in {
-        HintUsage.NONE,
-        HintUsage.NOT_APPLICABLE,
-    }
+    independent_without_hints = outcome == AttemptOutcome.SOLVED_INDEPENDENTLY
     if outcome == AttemptOutcome.FAILED:
         mastery, streak, days = MasteryState.NEEDS_RELEARNING, 0, 7
-    elif (
-        outcome == AttemptOutcome.UNDERSTOOD_AFTER_SOLUTION
-        or hint_usage == HintUsage.SOLUTION_VIEWED
-    ):
+    elif outcome == AttemptOutcome.UNDERSTOOD_AFTER_SOLUTION:
         mastery, streak, days = MasteryState.LEARNING, 0, 14
-    elif outcome == AttemptOutcome.SOLVED_SIGNIFICANT_HELP or hint_usage == HintUsage.SIGNIFICANT:
+    elif outcome == AttemptOutcome.SOLVED_SIGNIFICANT_HELP:
         mastery, streak, days = MasteryState.LEARNING, 0, 30
     elif outcome == AttemptOutcome.SKIPPED:
         mastery, streak, days = previous_mastery, successful_streak, 14
     else:
         streak = successful_streak + 1
-        if outcome == AttemptOutcome.SOLVED_SMALL_HINT or hint_usage == HintUsage.SMALL:
+        if outcome == AttemptOutcome.SOLVED_SMALL_HINT:
             mastery = MasteryState.FRAGILE
             days = 60
             factors.append("Scheduled for 60 days because a small hint was used")

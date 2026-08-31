@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import CheckConstraint, Date, DateTime, Enum, ForeignKey, Index, Integer, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from codemuscle.domain.enums import AttemptOutcome, HintUsage, MasteryState
+from codemuscle.domain.enums import AttemptOutcome, MasteryState
 from codemuscle.infrastructure.database.base import Base
 
 if TYPE_CHECKING:
@@ -28,9 +28,6 @@ class Attempt(Base):
     attempted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     outcome: Mapped[AttemptOutcome] = mapped_column(
         Enum(AttemptOutcome, name="attempt_outcome"), nullable=False
-    )
-    hint_usage: Mapped[HintUsage] = mapped_column(
-        Enum(HintUsage, name="hint_usage"), nullable=False
     )
     time_spent_minutes: Mapped[int | None] = mapped_column(Integer)
     notes: Mapped[str | None] = mapped_column(Text)

@@ -84,13 +84,12 @@ summary. Request:
 {
   "attempted_at": "2026-07-28T18:00:00Z",
   "outcome": "SOLVED_INDEPENDENTLY",
-  "hint_usage": "NONE",
   "time_spent_minutes": 25,
   "notes": "Remember empty input"
 }
 ```
 
-Required: `outcome`. `hint_usage` defaults to `NOT_APPLICABLE`; `attempted_at` defaults to now.
+Required: `outcome`. `attempted_at` defaults to now.
 Time is 0–1440. Returns `201 Attempt`, including previous/calculated mastery,
 calculated next date, and explanation. Errors: 404 problem; 422 validation.
 

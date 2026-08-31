@@ -9,7 +9,7 @@ from codemuscle.application.attempts.schemas import AttemptCreate
 from codemuscle.application.attempts.service import AttemptService
 from codemuscle.application.problems.schemas import ProblemCreate
 from codemuscle.application.problems.service import ProblemService
-from codemuscle.domain.enums import AttemptOutcome, HintUsage, MasteryState
+from codemuscle.domain.enums import AttemptOutcome, MasteryState
 from codemuscle.infrastructure.database.base import Base
 from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic  # noqa: F401
 
@@ -30,7 +30,6 @@ def test_attempts_are_immutable_history_and_update_summary(session: Session) -> 
         AttemptCreate(
             attempted_at=datetime(2026, 7, 20, 9, tzinfo=UTC),
             outcome=AttemptOutcome.SOLVED_INDEPENDENTLY,
-            hint_usage=HintUsage.NONE,
             time_spent_minutes=18,
         ),
     )
@@ -39,7 +38,6 @@ def test_attempts_are_immutable_history_and_update_summary(session: Session) -> 
         AttemptCreate(
             attempted_at=datetime(2026, 7, 21, 9, tzinfo=UTC),
             outcome=AttemptOutcome.FAILED,
-            hint_usage=HintUsage.SOLUTION_VIEWED,
             notes="Missed the duplicate case",
         ),
     )

@@ -7,7 +7,6 @@ import {
   AttemptOutcome,
   createAttempt,
   fetchAttempts,
-  HintUsage,
 } from "@/lib/attempts";
 
 import {
@@ -215,16 +214,15 @@ export function ProblemLibrary() {
     const form = new FormData(formElement);
     setSubmitting(true);
     try {
+      const outcome = String(form.get("outcome")) as AttemptOutcome;
       await createAttempt(attemptProblem.id, {
-        outcome: String(form.get("outcome")) as AttemptOutcome,
-        hint_usage: String(form.get("hint_usage")) as HintUsage,
+        outcome,
         time_spent_minutes: form.get("time_spent_minutes")
           ? Number(form.get("time_spent_minutes"))
           : null,
         notes: String(form.get("notes") ?? "").trim() || null,
       });
-      formElement.reset();
-      setAttempts(await fetchAttempts(attemptProblem.id));
+      setAttemptProblem(null);
       await load();
     } catch (reason) {
       setError(
@@ -713,20 +711,6 @@ export function ProblemLibrary() {
                   </option>
                   <option value="FAILED">Failed</option>
                   <option value="SKIPPED">Skipped</option>
-                </select>
-              </label>
-              <label className="field-label">
-                Hint usage
-                <select
-                  name="hint_usage"
-                  className="field-control"
-                  defaultValue="NONE"
-                >
-                  <option value="NONE">None</option>
-                  <option value="SMALL">Small</option>
-                  <option value="SIGNIFICANT">Significant</option>
-                  <option value="SOLUTION_VIEWED">Solution viewed</option>
-                  <option value="NOT_APPLICABLE">Not applicable</option>
                 </select>
               </label>
               <label className="field-label">

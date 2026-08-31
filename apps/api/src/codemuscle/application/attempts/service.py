@@ -28,7 +28,6 @@ class AttemptService:
         schedule = calculate_schedule(
             attempted_on=attempted_at.date(),
             outcome=data.outcome,
-            hint_usage=data.hint_usage,
             previous_mastery=problem.current_mastery_state,
             successful_streak=problem.successful_revision_streak,
             difficulty=problem.difficulty,
@@ -41,7 +40,6 @@ class AttemptService:
             problem_id=problem.id,
             attempted_at=attempted_at,
             outcome=data.outcome,
-            hint_usage=data.hint_usage,
             time_spent_minutes=data.time_spent_minutes,
             notes=data.notes or None,
             previous_mastery_state=problem.current_mastery_state,

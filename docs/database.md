@@ -35,7 +35,6 @@ erDiagram
       uuid problem_id FK
       timestamptz attempted_at
       attempt_outcome outcome
-      hint_usage hint_usage
       mastery_state calculated_mastery_state
       date calculated_next_revision_date
     }
@@ -102,7 +101,6 @@ Purpose: immutable chronological practice events and a snapshot of each scheduli
 | `problem_id` | UUID FK | no | References `problems`; delete restricted |
 | `attempted_at` | timestamptz | no | User event time |
 | `outcome` | enum | no | Independent/small hint/significant help/understood/failed/skipped |
-| `hint_usage` | enum | no | None/small/significant/solution/not applicable |
 | `time_spent_minutes` | integer | yes | Check: nonnegative |
 | `notes` | text | yes | Attempt-specific notes |
 | `previous_mastery_state` | enum | no | State before event |
@@ -162,7 +160,6 @@ directory. A backup database snapshot includes this table so restore also restor
   `NEEDS_RELEARNING`, `ARCHIVED`.
 - `attempt_outcome`: `SOLVED_INDEPENDENTLY`, `SOLVED_SMALL_HINT`,
   `SOLVED_SIGNIFICANT_HELP`, `UNDERSTOOD_AFTER_SOLUTION`, `FAILED`, `SKIPPED`.
-- `hint_usage`: `NONE`, `SMALL`, `SIGNIFICANT`, `SOLUTION_VIEWED`, `NOT_APPLICABLE`.
 
 ## Lifecycle and cascade rules
 

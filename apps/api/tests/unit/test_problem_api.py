@@ -42,7 +42,6 @@ def test_problem_api_create_list_and_not_found_error() -> None:
             f"/api/v1/problems/{created.json()['id']}/attempts",
             json={
                 "outcome": "SOLVED_INDEPENDENTLY",
-                "hint_usage": "NONE",
             },
         )
         history = client.get(f"/api/v1/problems/{created.json()['id']}/attempts")
