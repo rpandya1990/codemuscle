@@ -77,6 +77,7 @@ describe("ProblemsPage", () => {
         platform: null,
         difficulty: "UNKNOWN" as const,
         notes: null,
+        solution: null,
         priority: 3,
         total_attempts: 0,
         successful_revision_streak: 0,
@@ -120,6 +121,7 @@ describe("ProblemsPage", () => {
           platform: "LeetCode",
           difficulty: "EASY",
           notes: null,
+          solution: "function twoSum() { return []; }",
           priority: 3,
           total_attempts: 0,
           successful_revision_streak: 0,
@@ -160,6 +162,7 @@ describe("ProblemsPage", () => {
           platform: null,
           difficulty: "UNKNOWN",
           notes: null,
+          solution: null,
           priority: 3,
           total_attempts: 0,
           successful_revision_streak: 0,
@@ -198,6 +201,7 @@ describe("ProblemsPage", () => {
             platform: null,
             difficulty: "MEDIUM",
             notes: null,
+            solution: "const reverse = (value) => value;",
             priority: 3,
             total_attempts: 0,
             successful_revision_streak: 0,
@@ -232,6 +236,9 @@ describe("ProblemsPage", () => {
     const timeSpent = within(dialog).getByRole("spinbutton", {
       name: "Time spent (minutes)",
     });
+    expect(
+      within(dialog).getByRole("textbox", { name: /Solution/ }),
+    ).toHaveValue("const reverse = (value) => value;");
     expect(
       within(dialog).queryByRole("combobox", { name: "Hint usage" }),
     ).not.toBeInTheDocument();

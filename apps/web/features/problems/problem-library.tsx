@@ -103,6 +103,7 @@ export function ProblemLibrary() {
         url: String(form.get("url") ?? "").trim() || undefined,
         difficulty: String(form.get("difficulty")) as Difficulty,
         notes: String(form.get("notes") ?? "").trim() || undefined,
+        solution: String(form.get("solution") ?? "").trim() || undefined,
         topics: String(form.get("topics") ?? "")
           .split(",")
           .map((topic) => topic.trim())
@@ -158,6 +159,7 @@ export function ProblemLibrary() {
         url: String(form.get("url") ?? "").trim() || null,
         difficulty: String(form.get("difficulty")) as Difficulty,
         notes: String(form.get("notes") ?? "").trim() || null,
+        solution: String(form.get("solution") ?? "").trim() || null,
         patterns: String(form.get("patterns") ?? "")
           .split(",")
           .map((pattern) => pattern.trim())
@@ -215,6 +217,8 @@ export function ProblemLibrary() {
     setSubmitting(true);
     try {
       const outcome = String(form.get("outcome")) as AttemptOutcome;
+      const solution = String(form.get("solution") ?? "").trim() || null;
+      await updateProblem(attemptProblem.id, { solution });
       await createAttempt(attemptProblem.id, {
         outcome,
         time_spent_minutes: form.get("time_spent_minutes")
@@ -505,6 +509,17 @@ export function ProblemLibrary() {
               />
             </label>
             <label className="field-label">
+              Solution{" "}
+              <span className="font-normal text-slate-400">(optional)</span>
+              <textarea
+                name="solution"
+                rows={8}
+                spellCheck={false}
+                placeholder="Paste your working code"
+                className="field-control resize-y font-mono text-sm"
+              />
+            </label>
+            <label className="field-label">
               Topics
               <input
                 name="topics"
@@ -610,6 +625,18 @@ export function ProblemLibrary() {
                   rows={5}
                   defaultValue={editing.notes ?? ""}
                   className="field-control resize-y"
+                />
+              </label>
+              <label className="field-label">
+                Solution{" "}
+                <span className="font-normal text-slate-400">(optional)</span>
+                <textarea
+                  name="solution"
+                  rows={10}
+                  spellCheck={false}
+                  defaultValue={editing.solution ?? ""}
+                  placeholder="Paste your working code"
+                  className="field-control resize-y font-mono text-sm"
                 />
               </label>
               <label className="field-label">
@@ -730,6 +757,21 @@ export function ProblemLibrary() {
                   rows={3}
                   className="field-control resize-y"
                 />
+              </label>
+              <label className="field-label sm:col-span-2">
+                Solution{" "}
+                <span className="font-normal text-slate-400">(optional)</span>
+                <textarea
+                  name="solution"
+                  rows={10}
+                  spellCheck={false}
+                  defaultValue={attemptProblem.solution ?? ""}
+                  placeholder="Paste your working code"
+                  className="field-control resize-y font-mono text-sm"
+                />
+                <span className="mt-2 block text-xs font-normal text-slate-400">
+                  Saved on this problem so it remains available on future attempts.
+                </span>
               </label>
               <button
                 disabled={submitting}

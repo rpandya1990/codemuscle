@@ -31,21 +31,29 @@ def test_create_update_filter_archive_and_restore_problem(session: Session) -> N
             title="Two Sum",
             url=HttpUrl("https://leetcode.com/problems/two-sum/"),
             difficulty=Difficulty.EASY,
+            solution="def two_sum(nums, target):\n    return []",
             topics=["Array", "Hash Table", "array"],
             patterns=["Lookup"],
         )
     )
 
     assert {topic.name for topic in created.topics} == {"Array", "Hash Table"}
+    assert created.solution == "def two_sum(nums, target):\n    return []"
     assert service.list(search="two", difficulty=Difficulty.EASY).total == 1
     assert service.list(topic_id=created.topics[0].id).total == 1
 
     updated = service.update(
         created.id,
-        ProblemUpdate(title="Two Sum Updated", priority=5, topics=["Arrays"]),
+        ProblemUpdate(
+            title="Two Sum Updated",
+            priority=5,
+            solution="def two_sum(nums, target):\n    return [0, 1]",
+            topics=["Arrays"],
+        ),
     )
     assert updated.title == "Two Sum Updated"
     assert updated.priority == 5
+    assert updated.solution == "def two_sum(nums, target):\n    return [0, 1]"
     assert [topic.name for topic in updated.topics] == ["Arrays"]
 
     assert service.archive(created.id).archived_at is not None

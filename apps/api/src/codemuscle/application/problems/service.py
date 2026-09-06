@@ -54,6 +54,7 @@ class ProblemService:
             platform_identifier=data.platform_identifier,
             difficulty=data.difficulty,
             notes=data.notes,
+            solution=data.solution,
             priority=data.priority,
             estimated_duration_minutes=data.estimated_duration_minutes,
             import_job_id=import_job_id,

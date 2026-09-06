@@ -63,6 +63,7 @@ class Problem(TimestampMixin, Base):
         Enum(Difficulty, name="difficulty"), default=Difficulty.UNKNOWN, nullable=False
     )
     notes: Mapped[str | None] = mapped_column(Text)
+    solution: Mapped[str | None] = mapped_column(Text)
     priority: Mapped[int] = mapped_column(Integer, default=3, nullable=False)
     date_added: Mapped[date] = mapped_column(Date, default=date.today, nullable=False)
     current_mastery_state: Mapped[MasteryState] = mapped_column(

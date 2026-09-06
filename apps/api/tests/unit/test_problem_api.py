@@ -32,6 +32,7 @@ def test_problem_api_create_list_and_not_found_error() -> None:
                 "title": "Binary Search",
                 "url": "https://leetcode.com/problems/binary-search/",
                 "difficulty": "EASY",
+                "solution": "def binary_search():\n    pass",
                 "topics": ["Binary Search"],
             },
         )
@@ -50,6 +51,7 @@ def test_problem_api_create_list_and_not_found_error() -> None:
         app.dependency_overrides.clear()
 
     assert created.status_code == 201
+    assert created.json()["solution"] == "def binary_search():\n    pass"
     assert missing_url.status_code == 201
     assert listed.json()["total"] == 1
     assert topics.status_code == 200

@@ -12,6 +12,7 @@ export interface Problem {
   platform: string | null;
   difficulty: Difficulty;
   notes: string | null;
+  solution: string | null;
   priority: number;
   total_attempts: number;
   successful_revision_streak: number;
@@ -67,11 +68,12 @@ export async function fetchTopics(): Promise<NamedReference[]> {
 export async function updateProblem(
   problemId: string,
   input: {
-    title: string;
-    url: string | null;
-    difficulty: Difficulty;
-    notes: string | null;
-    patterns: string[];
+    title?: string;
+    url?: string | null;
+    difficulty?: Difficulty;
+    notes?: string | null;
+    solution?: string | null;
+    patterns?: string[];
   },
 ): Promise<Problem> {
   const response = await fetch(`${API_URL}/problems/${problemId}`, {
@@ -88,6 +90,7 @@ export async function createProblem(input: {
   url?: string;
   difficulty: Difficulty;
   notes?: string;
+  solution?: string;
   topics: string[];
   patterns: string[];
 }): Promise<Problem> {
