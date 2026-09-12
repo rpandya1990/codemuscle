@@ -313,6 +313,13 @@ export function ProblemLibrary() {
           </div>
         ) : (
           <div>
+            <ProblemPagination
+              position="top"
+              page={page}
+              totalPages={totalPages}
+              totalProblems={problems.length}
+              onPageChange={setPage}
+            />
             <ul className="space-y-3">
               {visibleProblems.map((problem) => (
                 <li
@@ -395,39 +402,13 @@ export function ProblemLibrary() {
                 </li>
               ))}
             </ul>
-            <nav
-              className="mt-6 flex flex-wrap items-center justify-between gap-3"
-              aria-label="Problem pagination"
-            >
-              <p className="text-sm text-slate-500">
-                Showing {(page - 1) * PROBLEMS_PER_PAGE + 1}–
-                {Math.min(page * PROBLEMS_PER_PAGE, problems.length)} of{" "}
-                {problems.length}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="btn-quiet"
-                  disabled={page === 1}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                >
-                  Previous
-                </button>
-                <span className="px-2 text-sm font-medium text-slate-600">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  type="button"
-                  className="btn-quiet"
-                  disabled={page === totalPages}
-                  onClick={() =>
-                    setPage((current) => Math.min(totalPages, current + 1))
-                  }
-                >
-                  Next
-                </button>
-              </div>
-            </nav>
+            <ProblemPagination
+              position="bottom"
+              page={page}
+              totalPages={totalPages}
+              totalProblems={problems.length}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </section>
@@ -808,5 +789,52 @@ function LinkIcon() {
       <path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" />
       <path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1" />
     </svg>
+  );
+}
+
+function ProblemPagination({
+  position,
+  page,
+  totalPages,
+  totalProblems,
+  onPageChange,
+}: {
+  position: "top" | "bottom";
+  page: number;
+  totalPages: number;
+  totalProblems: number;
+  onPageChange: (page: number) => void;
+}) {
+  return (
+    <nav
+      className={`${position === "top" ? "mb-6" : "mt-6"} flex flex-wrap items-center justify-between gap-3`}
+      aria-label={`Problem pagination (${position})`}
+    >
+      <p className="text-sm text-slate-500">
+        Showing {(page - 1) * PROBLEMS_PER_PAGE + 1}–
+        {Math.min(page * PROBLEMS_PER_PAGE, totalProblems)} of {totalProblems}
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="btn-quiet"
+          disabled={page === 1}
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+        >
+          Previous
+        </button>
+        <span className="px-2 text-sm font-medium text-slate-600">
+          Page {page} of {totalPages}
+        </span>
+        <button
+          type="button"
+          className="btn-quiet"
+          disabled={page === totalPages}
+          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        >
+          Next
+        </button>
+      </div>
+    </nav>
   );
 }

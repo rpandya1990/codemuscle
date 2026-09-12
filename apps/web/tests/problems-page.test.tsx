@@ -93,7 +93,17 @@ describe("ProblemsPage", () => {
     });
 
     render(<ProblemsPage />);
-    expect(await screen.findByText("Showing 1–25 of 26")).toBeVisible();
+    const top = await screen.findByRole("navigation", {
+      name: "Problem pagination (top)",
+    });
+    const bottom = screen.getByRole("navigation", {
+      name: "Problem pagination (bottom)",
+    });
+    expect(within(top).getByText("Showing 1–25 of 26")).toBeVisible();
+    expect(within(bottom).getByText("Page 1 of 2")).toBeVisible();
+    expect(
+      within(top).getByRole("button", { name: "Previous" }),
+    ).toBeDisabled();
     expect(screen.queryByText("Problem 26")).not.toBeInTheDocument();
     fireEvent.click(
       screen.getAllByRole("button", { name: "Record attempt" })[0],
@@ -103,10 +113,19 @@ describe("ProblemsPage", () => {
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(within(top).getByRole("button", { name: "Next" }));
 
-    expect(screen.getByText("Showing 26–26 of 26")).toBeVisible();
+    for (const navigation of [top, bottom]) {
+      expect(within(navigation).getByText("Showing 26–26 of 26")).toBeVisible();
+      expect(within(navigation).getByText("Page 2 of 2")).toBeVisible();
+      expect(
+        within(navigation).getByRole("button", { name: "Next" }),
+      ).toBeDisabled();
+    }
     expect(screen.getByText("Problem 26")).toBeVisible();
+    fireEvent.click(within(bottom).getByRole("button", { name: "Previous" }));
+    expect(within(top).getByText("Page 1 of 2")).toBeVisible();
+    expect(screen.getByText("Problem 1")).toBeVisible();
   });
 
   it("shows a problem's link when one is available", async () => {
