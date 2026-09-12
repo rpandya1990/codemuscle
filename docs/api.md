@@ -147,7 +147,7 @@ Statistics endpoints are read-only and unauthenticated like the rest of the loca
 |---|---|---|
 | `GET /statistics/dashboard` | Active/due/overdue/practiced/mastery counts and 10 recent attempts | `200 DashboardStatistics` |
 | `GET /statistics/topics` | Deterministic statistics and classification for every topic | `200 AreaStatistics[]` |
-| `GET /statistics/trends?weeks=8` | Weekly attempts, independent successes, and failures | `200 {points: TrendPoint[]}`; weeks 0–52 (0 = all time) |
+| `GET /statistics/trends?interval=week&count=5` | Attempts, independent successes, and failures per calendar period | `200 {points: TrendPoint[]}` |
 | `GET /statistics/weak-areas` | Topics classified `WEAK` or `NEGLECTED` | `200 AreaStatistics[]` |
 
 `AreaStatistics` contains problem/attempt counts, independent and hint-assisted success rates, failure
@@ -187,6 +187,6 @@ When frontend code hot-reloads but a new backend route returns 404, rebuild the 
 docker compose up -d --build api
 ```
 
-Practice trends accept `weeks=0` for all recorded history, or `weeks=1` through `52` (default: 8). Empty weeks are included.
+Practice trends accept `interval=day|week|month|year` and `count=1` through `1000`, or `count=0` for all recorded history. Defaults are eight weeks. Each point has `period_start`, `attempts`, `independent_successes`, and `failures`. Empty periods and the current partial period are included; weeks start on Monday and month/year boundaries follow the calendar. Future dates are excluded. The legacy `weeks` parameter and `week_start` response field remain compatible with weekly clients.
 
-`GET /statistics/topics/total` returns `AreaStatistics` for all active problems, including untagged problems. Each problem and attempt is counted once even if it belongs to multiple topics.
+`GET /statistics/topics/total` returns `AreaStatistics` for all active problems, including untagged problems. Each problem and attempt is counted once even if it belongs to multiple topics. `independent_successes / total_attempts` gives the overall independent success rate (zero with no attempts); it is not an average of topic percentages. The table displays problem health instead: `health_rate = independently_solved_problems / total_problems` (zero for an empty set). A problem counts once if it has ever been solved independently, even with repeated successes or later failures. Unattempted active problems count in the denominator. Each topic and the overall row show the percentage and problem counts.

@@ -1,5 +1,5 @@
 from collections.abc import Iterator
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 from sqlalchemy import create_engine
@@ -10,6 +10,7 @@ from codemuscle.application.attempts.service import AttemptService
 from codemuscle.application.problems.schemas import ProblemCreate
 from codemuscle.application.problems.service import ProblemService
 from codemuscle.application.statistics.policy import classify_area
+from codemuscle.application.statistics.schemas import TrendInterval
 from codemuscle.application.statistics.service import StatisticsService
 from codemuscle.domain.enums import AttemptOutcome
 from codemuscle.infrastructure.database.base import Base
@@ -144,3 +145,139 @@ def test_empty_totals_and_history(session: Session) -> None:
     assert statistics.topic_totals().total_attempts == 0
     assert statistics.topic_totals().independent_success_rate == 0
     assert len(statistics.trends(0).points) == 1
+
+
+def test_total_percentage_uses_all_attempts_not_one_topic_or_average(session: Session) -> None:
+    problems = ProblemService(session)
+    first = problems.create(ProblemCreate(title="First", topics=["Arrays", "Sorting"]))
+    second = problems.create(ProblemCreate(title="Second", topics=["Graphs"]))
+    attempts = AttemptService(session)
+    for problem_id, outcome in [
+        (first.id, AttemptOutcome.SOLVED_INDEPENDENTLY),
+        (second.id, AttemptOutcome.SOLVED_INDEPENDENTLY),
+        (second.id, AttemptOutcome.FAILED),
+        (second.id, AttemptOutcome.SOLVED_SMALL_HINT),
+    ]:
+        attempts.create(problem_id, AttemptCreate(outcome=outcome))
+    total = StatisticsService(session).topic_totals()
+    assert total.independent_successes == 2
+    assert total.total_attempts == 4
+    assert total.independent_success_rate == 0.5
+    assert total.failed_attempt_rate == 0.25
+    assert all(
+        area.independent_success_rate != total.independent_success_rate
+        for area in StatisticsService(session).topics()
+    )
+
+
+@pytest.mark.parametrize(
+    ("interval", "today", "expected"),
+    [
+        (
+            "day",
+            date(2024, 3, 2),
+            [
+                date(2024, 2, 27),
+                date(2024, 2, 28),
+                date(2024, 2, 29),
+                date(2024, 3, 1),
+                date(2024, 3, 2),
+            ],
+        ),
+        (
+            "week",
+            date(2026, 1, 14),
+            [
+                date(2025, 12, 15),
+                date(2025, 12, 22),
+                date(2025, 12, 29),
+                date(2026, 1, 5),
+                date(2026, 1, 12),
+            ],
+        ),
+        (
+            "month",
+            date(2026, 3, 15),
+            [
+                date(2025, 11, 1),
+                date(2025, 12, 1),
+                date(2026, 1, 1),
+                date(2026, 2, 1),
+                date(2026, 3, 1),
+            ],
+        ),
+        (
+            "year",
+            date(2026, 3, 15),
+            [
+                date(2022, 1, 1),
+                date(2023, 1, 1),
+                date(2024, 1, 1),
+                date(2025, 1, 1),
+                date(2026, 1, 1),
+            ],
+        ),
+    ],
+)
+def test_trends_calendar_buckets(
+    session: Session, interval: TrendInterval, today: date, expected: list[date]
+) -> None:
+    problem = ProblemService(session).create(ProblemCreate(title="Calendar"))
+    for day, outcome in [
+        (expected[0] - timedelta(days=1), AttemptOutcome.FAILED),
+        (expected[0], AttemptOutcome.SOLVED_INDEPENDENTLY),
+        (today, AttemptOutcome.FAILED),
+        (today + timedelta(days=1), AttemptOutcome.FAILED),
+    ]:
+        AttemptService(session).create(
+            problem.id,
+            AttemptCreate(
+                attempted_at=datetime.combine(day, datetime.min.time(), UTC), outcome=outcome
+            ),
+        )
+    session.commit()
+    points = StatisticsService(session).trends(today=today, interval=interval, count=5).points
+    assert [point.period_start for point in points] == expected
+    assert [point.attempts for point in points] == [1, 0, 0, 0, 1]
+    assert points[0].independent_successes == 1
+    assert points[-1].failures == 1
+
+
+def test_health_counts_problems_including_unattempted_not_attempts(session: Session) -> None:
+    problems = ProblemService(session)
+    solved = problems.create(ProblemCreate(title="Solved", topics=["Arrays", "Sorting"]))
+    problems.create(ProblemCreate(title="Unattempted", topics=["Arrays"]))
+    assisted = problems.create(ProblemCreate(title="Assisted", topics=["Arrays"]))
+    untagged = problems.create(ProblemCreate(title="Untagged"))
+    archived = problems.create(ProblemCreate(title="Archived", topics=["Arrays"]))
+    for problem_id, outcomes in [
+        (solved.id, [AttemptOutcome.SOLVED_INDEPENDENTLY] * 3 + [AttemptOutcome.FAILED]),
+        (assisted.id, [AttemptOutcome.SOLVED_SMALL_HINT]),
+        (untagged.id, [AttemptOutcome.SOLVED_INDEPENDENTLY]),
+        (archived.id, [AttemptOutcome.SOLVED_INDEPENDENTLY]),
+    ]:
+        for outcome in outcomes:
+            AttemptService(session).create(problem_id, AttemptCreate(outcome=outcome))
+    problems.archive(archived.id)
+    statistics = StatisticsService(session)
+    topics = {topic.name: topic for topic in statistics.topics()}
+    assert topics["Arrays"].independently_solved_problems == 1
+    assert topics["Arrays"].total_problems == 3
+    assert topics["Arrays"].health_rate == pytest.approx(1 / 3)
+    assert topics["Sorting"].health_rate == 1
+    total = statistics.topic_totals()
+    assert total.independently_solved_problems == 2
+    assert total.total_problems == 4
+    assert total.health_rate == 0.5
+
+
+def test_health_is_zero_for_empty_or_unattempted_topics(session: Session) -> None:
+    statistics = StatisticsService(session)
+    assert statistics.topic_totals().health_rate == 0
+    problems = ProblemService(session)
+    problem = problems.create(ProblemCreate(title="Unattempted", topics=["Arrays"]))
+    assert statistics.topics()[0].health_rate == 0
+    assert statistics.topic_totals().independently_solved_problems == 0
+    problems.archive(problem.id)
+    assert statistics.topics()[0].total_problems == 0
+    assert statistics.topics()[0].health_rate == 0

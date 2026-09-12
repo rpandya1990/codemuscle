@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from codemuscle.application.statistics.schemas import (
     AreaStatistics,
     DashboardStatistics,
+    TrendInterval,
     TrendsResponse,
 )
 from codemuscle.application.statistics.service import StatisticsService
@@ -27,9 +28,12 @@ def topic_statistics(session: DatabaseSession) -> list[AreaStatistics]:
 
 @router.get("/trends", response_model=TrendsResponse)
 def trends(
-    session: DatabaseSession, weeks: Annotated[int, Query(ge=0, le=52)] = 8
+    session: DatabaseSession,
+    weeks: Annotated[int, Query(ge=0, le=52)] = 8,
+    interval: TrendInterval = "week",
+    count: Annotated[int | None, Query(ge=0, le=1000)] = None,
 ) -> TrendsResponse:
-    return StatisticsService(session).trends(weeks)
+    return StatisticsService(session).trends(weeks, interval=interval, count=count)
 
 
 @router.get("/weak-areas", response_model=list[AreaStatistics])

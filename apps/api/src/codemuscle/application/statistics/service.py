@@ -10,6 +10,7 @@ from codemuscle.application.statistics.schemas import (
     AreaStatistics,
     DashboardStatistics,
     RecentActivity,
+    TrendInterval,
     TrendPoint,
     TrendsResponse,
 )
@@ -83,38 +84,70 @@ class StatisticsService:
         areas = self.topics(today)
         return [area for area in areas if area.status in {"WEAK", "NEGLECTED"}]
 
-    def trends(self, weeks: int = 8, today: date | None = None) -> TrendsResponse:
+    def trends(
+        self,
+        weeks: int = 8,
+        today: date | None = None,
+        *,
+        interval: TrendInterval = "week",
+        count: int | None = None,
+    ) -> TrendsResponse:
         current_day = today or date.today()
-        current_week = current_day - timedelta(days=current_day.weekday())
-        if weeks == 0:
+        periods = weeks if count is None else count
+
+        def period_start(day: date) -> date:
+            if interval == "day":
+                return day
+            if interval == "week":
+                return day - timedelta(days=day.weekday())
+            if interval == "month":
+                return day.replace(day=1)
+            return day.replace(month=1, day=1)
+
+        def shift(start: date, offset: int) -> date:
+            if interval == "day":
+                return start + timedelta(days=offset)
+            if interval == "week":
+                return start + timedelta(weeks=offset)
+            if interval == "month":
+                year, month = divmod(start.year * 12 + start.month - 1 + offset, 12)
+                return date(year, month + 1, 1)
+            return date(start.year + offset, 1, 1)
+
+        current = period_start(current_day)
+        if periods == 0:
             earliest = self.session.scalar(select(func.min(Attempt.attempted_at)))
-            first_day = min(earliest.date(), current_day) if earliest else current_day
-            weeks = (current_week - (first_day - timedelta(days=first_day.weekday()))).days // 7 + 1
-        start = current_week - timedelta(weeks=weeks - 1)
+            start = period_start(min(earliest.date(), current_day) if earliest else current_day)
+        else:
+            start = shift(current, 1 - periods)
+        buckets: dict[date, list[Attempt]] = {}
+        cursor = start
+        while cursor <= current:
+            buckets[cursor] = []
+            cursor = shift(cursor, 1)
         attempts = self.session.scalars(
             select(Attempt).where(
-                Attempt.attempted_at >= datetime.combine(start, datetime.min.time(), UTC)
+                Attempt.attempted_at >= datetime.combine(start, datetime.min.time(), UTC),
+                Attempt.attempted_at
+                < datetime.combine(current_day + timedelta(days=1), datetime.min.time(), UTC),
             )
         ).all()
-        buckets: dict[date, list[Attempt]] = {
-            start + timedelta(weeks=offset): [] for offset in range(weeks)
-        }
         for attempt in attempts:
-            attempted_day = attempt.attempted_at.date()
-            week = attempted_day - timedelta(days=attempted_day.weekday())
-            if week in buckets:
-                buckets[week].append(attempt)
+            bucket = period_start(attempt.attempted_at.date())
+            if bucket in buckets:
+                buckets[bucket].append(attempt)
         return TrendsResponse(
             points=[
                 TrendPoint(
-                    week_start=week,
+                    period_start=start,
+                    week_start=start,
                     attempts=len(items),
                     independent_successes=sum(
                         item.outcome == AttemptOutcome.SOLVED_INDEPENDENTLY for item in items
                     ),
                     failures=sum(item.outcome == AttemptOutcome.FAILED for item in items),
                 )
-                for week, items in sorted(buckets.items())
+                for start, items in buckets.items()
             ]
         )
 
@@ -138,6 +171,13 @@ class StatisticsService:
         attempts = sorted(
             (attempt for problem in active for attempt in problem.attempts),
             key=lambda attempt: attempt.attempted_at,
+        )
+        independently_solved = sum(
+            any(
+                attempt.outcome == AttemptOutcome.SOLVED_INDEPENDENTLY
+                for attempt in problem.attempts
+            )
+            for problem in active
         )
         total = len(attempts)
         independent = sum(
@@ -173,8 +213,11 @@ class StatisticsService:
             id=area_id,
             name=name,
             total_problems=len(active),
+            independently_solved_problems=independently_solved,
+            health_rate=independently_solved / len(active) if active else 0.0,
             total_attempts=total,
-            independent_success_rate=round(independent_rate, 3),
+            independent_successes=independent,
+            independent_success_rate=independent_rate,
             hint_assisted_success_rate=round(assisted / total, 3) if total else 0.0,
             failed_attempt_rate=round(failure_rate, 3),
             problems_due=sum(problem.next_revision_date == today for problem in active),

@@ -20,7 +20,10 @@ export interface AreaStatistics {
   id: string;
   name: string;
   total_problems: number;
+  independently_solved_problems: number;
+  health_rate: number;
   total_attempts: number;
+  independent_successes: number;
   independent_success_rate: number;
   hint_assisted_success_rate: number;
   failed_attempt_rate: number;
@@ -34,7 +37,7 @@ export interface AreaStatistics {
 }
 
 export interface TrendPoint {
-  week_start: string;
+  period_start: string;
   attempts: number;
   independent_successes: number;
   failures: number;
@@ -56,8 +59,12 @@ export const fetchTopicStatistics = () =>
   get<AreaStatistics[]>("/statistics/topics");
 export const fetchWeakAreas = () =>
   get<AreaStatistics[]>("/statistics/weak-areas");
-export const fetchTrends = (weeks = 8) =>
-  get<{ points: TrendPoint[] }>(`/statistics/trends?weeks=${weeks}`);
+export type TrendInterval = "day" | "week" | "month" | "year";
+
+export const fetchTrends = (interval: TrendInterval = "week", count = 8) =>
+  get<{ points: TrendPoint[] }>(
+    `/statistics/trends?interval=${interval}&count=${count}`,
+  );
 
 export const fetchTopicTotals = () =>
   get<AreaStatistics>("/statistics/topics/total");

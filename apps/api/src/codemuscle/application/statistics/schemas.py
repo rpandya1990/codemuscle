@@ -1,7 +1,10 @@
 import uuid
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
+
+TrendInterval = Literal["day", "week", "month", "year"]
 
 
 class RecentActivity(BaseModel):
@@ -26,7 +29,10 @@ class AreaStatistics(BaseModel):
     id: uuid.UUID
     name: str
     total_problems: int
+    independently_solved_problems: int
+    health_rate: float
     total_attempts: int
+    independent_successes: int
     independent_success_rate: float
     hint_assisted_success_rate: float
     failed_attempt_rate: float
@@ -40,7 +46,8 @@ class AreaStatistics(BaseModel):
 
 
 class TrendPoint(BaseModel):
-    week_start: date
+    period_start: date
+    week_start: date  # Compatibility for existing weekly clients.
     attempts: int
     independent_successes: int
     failures: int
