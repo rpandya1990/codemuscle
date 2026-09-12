@@ -13,7 +13,7 @@ from codemuscle.application.statistics.policy import classify_area
 from codemuscle.application.statistics.service import StatisticsService
 from codemuscle.domain.enums import AttemptOutcome
 from codemuscle.infrastructure.database.base import Base
-from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic  # noqa: F401
+from codemuscle.infrastructure.database.models import Attempt, Problem, Topic  # noqa: F401
 
 
 @pytest.fixture
@@ -68,9 +68,9 @@ def test_area_classification(kwargs: dict[str, object], expected: str) -> None:
     assert reasons
 
 
-def test_dashboard_topic_pattern_and_trend_statistics(session: Session) -> None:
+def test_dashboard_topic_and_trend_statistics(session: Session) -> None:
     problem = ProblemService(session).create(
-        ProblemCreate(title="Course Schedule", topics=["Graphs"], patterns=["Topological Sort"])
+        ProblemCreate(title="Course Schedule", topics=["Graphs"])
     )
     problem_model = session.get(Problem, problem.id)
     assert problem_model is not None
@@ -88,7 +88,6 @@ def test_dashboard_topic_pattern_and_trend_statistics(session: Session) -> None:
 
     dashboard = service.dashboard(date(2026, 7, 29))
     topics = service.topics(date(2026, 7, 29))
-    patterns = service.patterns(date(2026, 7, 29))
     trends = service.trends(weeks=2, today=date(2026, 7, 29))
 
     assert dashboard.total_active_problems == 1
@@ -97,7 +96,6 @@ def test_dashboard_topic_pattern_and_trend_statistics(session: Session) -> None:
     assert dashboard.recent_activity[0].problem_title == "Course Schedule"
     assert topics[0].name == "Graphs"
     assert topics[0].total_attempts == 1
-    assert patterns[0].name == "Topological Sort"
     assert sum(point.attempts for point in trends.points) == 1
     assert len(trends.points) == 2
 
@@ -113,3 +111,36 @@ def test_neglected_threshold_is_thirty_days() -> None:
         today=date(2026, 7, 29),
     )
     assert status == "NEGLECTED"
+
+
+def test_totals_count_shared_and_untagged_problems_once(session: Session) -> None:
+    service = ProblemService(session)
+    shared = service.create(ProblemCreate(title="Shared", topics=["Arrays", "Sorting"]))
+    service.create(ProblemCreate(title="Untagged"))
+    archived = service.create(ProblemCreate(title="Archived", topics=["Arrays"]))
+    service.archive(archived.id)
+    AttemptService(session).create(
+        shared.id,
+        AttemptCreate(
+            attempted_at=datetime(2025, 1, 1, tzinfo=UTC),
+            outcome=AttemptOutcome.SOLVED_INDEPENDENTLY,
+        ),
+    )
+    statistics = StatisticsService(session)
+    total = statistics.topic_totals(date(2026, 7, 29))
+    assert total.total_problems == 2
+    assert total.total_attempts == 1
+    assert total.independent_success_rate == 1
+    assert sum(point.attempts for point in statistics.trends(2, date(2026, 7, 29)).points) == 0
+    history = statistics.trends(0, date(2026, 7, 29)).points
+    assert len(history) > 52
+    assert sum(point.attempts for point in history) == 1
+    assert history[0].week_start == date(2024, 12, 30)
+    assert history[-1].week_start == date(2026, 7, 27)
+
+
+def test_empty_totals_and_history(session: Session) -> None:
+    statistics = StatisticsService(session)
+    assert statistics.topic_totals().total_attempts == 0
+    assert statistics.topic_totals().independent_success_rate == 0
+    assert len(statistics.trends(0).points) == 1

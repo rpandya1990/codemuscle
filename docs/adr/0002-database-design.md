@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Scheduling depends on ordered attempts; imports and queues need traceability; topics/patterns are
+Scheduling depends on ordered attempts; imports and queues need traceability; topics are
 shared classifications. The system must preserve audit history and support reliable constraints,
 transactions, UUIDs, enums, JSON metadata, and future statistics.
 

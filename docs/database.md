@@ -11,8 +11,6 @@ erDiagram
     PROBLEMS ||--o{ ATTEMPTS : records
     PROBLEMS ||--o{ PROBLEM_TOPICS : classified_by
     TOPICS ||--o{ PROBLEM_TOPICS : contains
-    PROBLEMS ||--o{ PROBLEM_PATTERNS : uses
-    PATTERNS ||--o{ PROBLEM_PATTERNS : contains
     IMPORT_JOBS ||--o{ IMPORT_ROWS : validates
     IMPORT_JOBS ||--o{ PROBLEMS : creates
     PROBLEMS ||--o{ IMPORT_ROWS : created_from
@@ -39,7 +37,6 @@ erDiagram
       date calculated_next_revision_date
     }
     TOPICS { uuid id PK varchar name varchar normalized_name UK }
-    PATTERNS { uuid id PK varchar name varchar normalized_name UK }
     IMPORT_JOBS { uuid id PK varchar status json mapping }
     IMPORT_ROWS { uuid id PK uuid import_job_id FK varchar status json errors }
     QUEUE_SESSIONS { uuid id PK int available_minutes varchar status }
@@ -80,15 +77,15 @@ Purpose: authoritative problem metadata plus the current denormalized revision s
 | `created_at`, `updated_at` | timestamptz | not null | Audit timestamps |
 
 Indexes: normalized title, normalized URL, next revision date, mastery state, archive timestamp, and
-import job. Relationships: many-to-many topics/patterns; one-to-many attempts and queue items.
+import job. Relationships: many-to-many topics; one-to-many attempts and queue items.
 
-### `topics` and `patterns`
+### `topics`
 
 Purpose: normalized reusable classifications. Each has `id UUID PK`, `name varchar(255) NOT NULL`,
 `normalized_name varchar(255) NOT NULL UNIQUE`, and `created_at timestamptz NOT NULL`.
 
-`problem_topics` and `problem_patterns` are association tables with composite primary keys
-`(problem_id, topic_id|pattern_id)`. Both foreign keys use `ON DELETE CASCADE`, so removing either
+`problem_topics` is an association table with a composite primary key
+`(problem_id, topic_id)`. Both foreign keys use `ON DELETE CASCADE`, so removing either
 side removes only the association.
 
 ### `attempts`
@@ -165,7 +162,6 @@ directory. A backup database snapshot includes this table so restore also restor
 
 - Archiving a problem sets `archived_at`; it does not delete history.
 - Attempts and queue items restrict problem deletion. There is no normal delete-problem API.
-- Topic/pattern associations cascade when either parent is deleted.
 - Import rows cascade with their job; imported problems keep `import_job_id` traceability.
 - Queue items cascade only when their queue session is deleted; UI removal changes status.
 - Private uploaded files live outside PostgreSQL in the configured workspace `imports/` directory.
@@ -183,3 +179,5 @@ Never edit a migration already applied to a shared/user database. Add a new revi
 fresh upgrade path and upgrade from the previous head. Revisions `0004` and `0005` deliberately record
 the removed/restored import workflow; do not collapse them. Back up user data before destructive
 migrations. See [ADR 0002](adr/0002-database-design.md).
+
+Migration `20260912_0014` merges former pattern labels and associations into topics by normalized name, then drops the old tables. Downgrading recreates empty legacy tables; merged topics remain.

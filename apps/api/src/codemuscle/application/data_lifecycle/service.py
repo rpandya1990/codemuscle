@@ -40,10 +40,8 @@ APPLICATION_VERSION = "0.1.0"
 TABLE_ORDER = [
     "import_jobs",
     "topics",
-    "patterns",
     "problems",
     "problem_topics",
-    "problem_patterns",
     "attempts",
     "import_rows",
     "queue_sessions",
@@ -70,7 +68,6 @@ class DataLifecycleService:
             self.session.scalars(
                 select(Problem).options(
                     selectinload(Problem.topics),
-                    selectinload(Problem.patterns),
                     selectinload(Problem.attempts),
                 )
             ).unique()
@@ -299,7 +296,6 @@ class DataLifecycleService:
                     "mastery": problem.current_mastery_state,
                     "next_revision_date": problem.next_revision_date,
                     "topics": [topic.name for topic in problem.topics],
-                    "patterns": [pattern.name for pattern in problem.patterns],
                     "attempts": [
                         {
                             "attempted_at": attempt.attempted_at,
@@ -329,7 +325,6 @@ class DataLifecycleService:
                     "mastery",
                     "next_revision_date",
                     "topics",
-                    "patterns",
                     "attempt_count",
                 ],
             )
@@ -345,7 +340,6 @@ class DataLifecycleService:
                         "mastery": problem.current_mastery_state.value,
                         "next_revision_date": problem.next_revision_date or "",
                         "topics": ", ".join(topic.name for topic in problem.topics),
-                        "patterns": ", ".join(pattern.name for pattern in problem.patterns),
                         "attempt_count": len(problem.attempts),
                     }
                 )
@@ -366,7 +360,6 @@ class DataLifecycleService:
                 "Mastery",
                 "Next revision",
                 "Topics",
-                "Patterns",
             ]
         )
         attempts = workbook.create_sheet("Attempts")
@@ -391,7 +384,6 @@ class DataLifecycleService:
                     problem.current_mastery_state.value,
                     problem.next_revision_date,
                     ", ".join(topic.name for topic in problem.topics),
-                    ", ".join(pattern.name for pattern in problem.patterns),
                 ]
             )
             for attempt in problem.attempts:

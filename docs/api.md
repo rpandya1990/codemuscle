@@ -24,7 +24,7 @@ specified. Validation errors return HTTP 422. Domain errors use:
 
 ### `GET /problems`
 
-Lists active problems by default. Query parameters: `search`, `topic_id`, `pattern_id`, `difficulty`,
+Lists active problems by default. Query parameters: `search`, `topic_id`, `difficulty`,
 `mastery_state`, `platform`, `archived` (boolean), `page` (≥1), and `page_size` (1–5000).
 
 Response: `200 {items: Problem[], total, page, page_size}`. Search covers normalized title and notes.
@@ -42,13 +42,12 @@ Creates a problem. Request fields:
   "notes": "Sort by start time",
   "priority": 3,
   "estimated_duration_minutes": 35,
-  "topics": ["Arrays"],
-  "patterns": ["Intervals"]
+  "topics": ["Arrays"]
 }
 ```
 
 Only `title` is required. URL and all supporting details are optional. Title max 500; priority 1–5;
-duration 1–1440; at most 30 topics/patterns. Returns `201 Problem`.
+duration 1–1440; at most 30 topics. Returns `201 Problem`.
 
 ### Problem read/update and classification
 
@@ -61,7 +60,7 @@ duration 1–1440; at most 30 topics/patterns. Returns `201 Problem`.
 | `POST /problems/{problem_id}/archive` | Soft archive | None | `200 Problem` | 404 |
 | `POST /problems/{problem_id}/restore` | Clear archive timestamp | None | `200 Problem` | 404 |
 
-`Problem` includes identifiers/metadata, topics/patterns, priority, mastery, attempt/streak counters,
+`Problem` includes identifiers/metadata, topics, priority, mastery, attempt/streak counters,
 effective and calculated revision dates, override marker, archive state, and audit timestamps.
 
 ### Revision-date override
@@ -111,7 +110,7 @@ There are intentionally no normal update/delete attempt endpoints.
 | `POST /imports/{id}/commit` | Import valid and accepted duplicate rows | `{"include_duplicate_row_ids":[...]}` | `200 {import_id,imported,skipped_invalid,skipped_duplicates}` |
 | `POST /imports/{id}/retry` | Apply corrections to failed rows | `{"corrections":{"row-uuid":{"title":"..."}}}` | `200 ImportJob` |
 
-Mapping targets include `title`, `url`, `difficulty`, `notes`, `topic`, `pattern`, legacy revision
+Mapping targets include `title`, `url`, `difficulty`, `notes`, `topic`, legacy revision
 dates/counts/streaks. Invalid rows never block valid rows. Legacy summaries are metadata, not attempts.
 
 ## Daily queues
@@ -148,8 +147,7 @@ Statistics endpoints are read-only and unauthenticated like the rest of the loca
 |---|---|---|
 | `GET /statistics/dashboard` | Active/due/overdue/practiced/mastery counts and 10 recent attempts | `200 DashboardStatistics` |
 | `GET /statistics/topics` | Deterministic statistics and classification for every topic | `200 AreaStatistics[]` |
-| `GET /statistics/patterns` | Same aggregate model for patterns | `200 AreaStatistics[]` |
-| `GET /statistics/trends?weeks=8` | Weekly attempts, independent successes, and failures | `200 {points: TrendPoint[]}`; weeks 1–52 |
+| `GET /statistics/trends?weeks=8` | Weekly attempts, independent successes, and failures | `200 {points: TrendPoint[]}`; weeks 0–52 (0 = all time) |
 | `GET /statistics/weak-areas` | Topics classified `WEAK` or `NEGLECTED` | `200 AreaStatistics[]` |
 
 `AreaStatistics` contains problem/attempt counts, independent and hint-assisted success rates, failure
@@ -188,3 +186,7 @@ When frontend code hot-reloads but a new backend route returns 404, rebuild the 
 ```bash
 docker compose up -d --build api
 ```
+
+Practice trends accept `weeks=0` for all recorded history, or `weeks=1` through `52` (default: 8). Empty weeks are included.
+
+`GET /statistics/topics/total` returns `AreaStatistics` for all active problems, including untagged problems. Each problem and attempt is counted once even if it belongs to multiple topics.

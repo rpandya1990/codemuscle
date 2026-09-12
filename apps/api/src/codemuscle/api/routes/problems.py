@@ -39,7 +39,6 @@ def list_problems(
     session: DatabaseSession,
     search: str | None = None,
     topic_id: uuid.UUID | None = None,
-    pattern_id: uuid.UUID | None = None,
     difficulty: Difficulty | None = None,
     mastery_state: MasteryState | None = None,
     platform: str | None = None,
@@ -50,7 +49,6 @@ def list_problems(
     return ProblemService(session).list(
         search=search,
         topic_id=topic_id,
-        pattern_id=pattern_id,
         difficulty=difficulty,
         mastery_state=mastery_state,
         platform=platform,

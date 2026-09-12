@@ -147,9 +147,6 @@ class QueueService:
                 selectinload(QueueSession.items)
                 .selectinload(QueueItem.problem)
                 .selectinload(Problem.topics),
-                selectinload(QueueSession.items)
-                .selectinload(QueueItem.problem)
-                .selectinload(Problem.patterns),
             )
         )
         if queue is None:
@@ -179,6 +176,5 @@ class QueueService:
     def _problem_query() -> Select[tuple[Problem]]:
         return select(Problem).options(
             selectinload(Problem.topics),
-            selectinload(Problem.patterns),
             selectinload(Problem.attempts),
         )

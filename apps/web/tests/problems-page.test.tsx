@@ -46,7 +46,6 @@ describe("ProblemsPage", () => {
       screen.getByRole("textbox", { name: /Problem link/ }),
     ).not.toBeRequired();
     expect(screen.getByRole("textbox", { name: /Notes/ })).toBeVisible();
-    expect(screen.getByRole("textbox", { name: /Patterns/ })).toBeVisible();
     expect(
       screen.getByRole("combobox", { name: "Filter by topic" }),
     ).toBeVisible();
@@ -87,7 +86,6 @@ describe("ProblemsPage", () => {
         current_mastery_state: "NEW",
         archived_at: null,
         topics: [],
-        patterns: [],
       })),
       total: 26,
       page: 1,
@@ -131,7 +129,6 @@ describe("ProblemsPage", () => {
           current_mastery_state: "NEW",
           archived_at: null,
           topics: [],
-          patterns: [],
         },
       ],
       total: 1,
@@ -172,7 +169,6 @@ describe("ProblemsPage", () => {
           current_mastery_state: "NEW",
           archived_at: null,
           topics: [],
-          patterns: [],
         },
       ],
       total: 1,
@@ -211,7 +207,6 @@ describe("ProblemsPage", () => {
             current_mastery_state: "NEW",
             archived_at: null,
             topics: [],
-            patterns: [],
           },
         ],
         total: 1,

@@ -1,8 +1,8 @@
+import uuid
 from collections import Counter
 from datetime import UTC, date, datetime, timedelta
-from typing import TypeVar
 
-from sqlalchemy import Select, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from codemuscle.application.statistics.policy import classify_area, trend_label
@@ -14,9 +14,8 @@ from codemuscle.application.statistics.schemas import (
     TrendsResponse,
 )
 from codemuscle.domain.enums import AttemptOutcome, MasteryState
-from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic
+from codemuscle.infrastructure.database.models import Attempt, Problem, Topic
 
-AreaModel = TypeVar("AreaModel", Topic, Pattern)
 SUCCESSFUL_OUTCOMES = {
     AttemptOutcome.SOLVED_INDEPENDENTLY,
     AttemptOutcome.SOLVED_SMALL_HINT,
@@ -76,8 +75,9 @@ class StatisticsService:
     def topics(self, today: date | None = None) -> list[AreaStatistics]:
         return self._areas(Topic, today or date.today())
 
-    def patterns(self, today: date | None = None) -> list[AreaStatistics]:
-        return self._areas(Pattern, today or date.today())
+    def topic_totals(self, today: date | None = None) -> AreaStatistics:
+        problems = list(self.session.scalars(self._problem_query()).unique())
+        return self._summarize(uuid.UUID(int=0), "All topics", problems, today or date.today())
 
     def weak_areas(self, today: date | None = None) -> list[AreaStatistics]:
         areas = self.topics(today)
@@ -86,6 +86,10 @@ class StatisticsService:
     def trends(self, weeks: int = 8, today: date | None = None) -> TrendsResponse:
         current_day = today or date.today()
         current_week = current_day - timedelta(days=current_day.weekday())
+        if weeks == 0:
+            earliest = self.session.scalar(select(func.min(Attempt.attempted_at)))
+            first_day = min(earliest.date(), current_day) if earliest else current_day
+            weeks = (current_week - (first_day - timedelta(days=first_day.weekday()))).days // 7 + 1
         start = current_week - timedelta(weeks=weeks - 1)
         attempts = self.session.scalars(
             select(Attempt).where(
@@ -114,7 +118,7 @@ class StatisticsService:
             ]
         )
 
-    def _areas(self, model: type[AreaModel], today: date) -> list[AreaStatistics]:
+    def _areas(self, model: type[Topic], today: date) -> list[AreaStatistics]:
         areas = self.session.scalars(
             select(model)
             .options(selectinload(model.problems).selectinload(Problem.attempts))
@@ -123,8 +127,14 @@ class StatisticsService:
         return [self._area(area, today) for area in areas]
 
     @staticmethod
-    def _area(area: AreaModel, today: date) -> AreaStatistics:
-        active = [problem for problem in area.problems if problem.archived_at is None]
+    def _area(area: Topic, today: date) -> AreaStatistics:
+        return StatisticsService._summarize(area.id, area.name, area.problems, today)
+
+    @staticmethod
+    def _summarize(
+        area_id: uuid.UUID, name: str, problems: list[Problem], today: date
+    ) -> AreaStatistics:
+        active = [problem for problem in problems if problem.archived_at is None]
         attempts = sorted(
             (attempt for problem in active for attempt in problem.attempts),
             key=lambda attempt: attempt.attempted_at,
@@ -160,8 +170,8 @@ class StatisticsService:
         )
         mastery = Counter(problem.current_mastery_state.value for problem in active)
         return AreaStatistics(
-            id=area.id,
-            name=area.name,
+            id=area_id,
+            name=name,
             total_problems=len(active),
             total_attempts=total,
             independent_success_rate=round(independent_rate, 3),

@@ -25,7 +25,6 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
     "difficulty": ("difficulty",),
     "notes": ("notes",),
     "topic": ("topic", "topics"),
-    "pattern": ("pattern", "patterns"),
     "last_revised_date": (
         "last revised or solved date",
         "last revised date",
@@ -228,7 +227,6 @@ class ImportService:
             difficulty=difficulty,
             notes=str(parsed["notes"]) if parsed.get("notes") else None,
             topics=ImportService._split_values(parsed.get("topic")),
-            patterns=ImportService._split_values(parsed.get("pattern")),
         )
 
     @staticmethod

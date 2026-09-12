@@ -108,10 +108,6 @@ export function ProblemLibrary() {
           .split(",")
           .map((topic) => topic.trim())
           .filter(Boolean),
-        patterns: String(form.get("patterns") ?? "")
-          .split(",")
-          .map((pattern) => pattern.trim())
-          .filter(Boolean),
       });
       formElement.reset();
       setDuplicateWarning(null);
@@ -160,10 +156,6 @@ export function ProblemLibrary() {
         difficulty: String(form.get("difficulty")) as Difficulty,
         notes: String(form.get("notes") ?? "").trim() || null,
         solution: String(form.get("solution") ?? "").trim() || null,
-        patterns: String(form.get("patterns") ?? "")
-          .split(",")
-          .map((pattern) => pattern.trim())
-          .filter(Boolean),
       });
       const revisionDate = String(form.get("next_revision_date") ?? "");
       if (revisionDate && revisionDate !== editing.next_revision_date) {
@@ -530,18 +522,6 @@ export function ProblemLibrary() {
                 Separate multiple topics with commas.
               </span>
             </label>
-            <label className="field-label">
-              Patterns{" "}
-              <span className="font-normal text-slate-400">(optional)</span>
-              <input
-                name="patterns"
-                placeholder="Sliding Window, Two Pointers"
-                className="field-control"
-              />
-              <span className="mt-2 block text-xs font-normal text-slate-400">
-                Separate multiple patterns with commas.
-              </span>
-            </label>
           </div>
           <div className="shrink-0 border-t border-slate-100 bg-white p-4">
             <button disabled={submitting} className="btn-primary w-full">
@@ -637,17 +617,6 @@ export function ProblemLibrary() {
                   defaultValue={editing.solution ?? ""}
                   placeholder="Paste your working code"
                   className="field-control resize-y font-mono text-sm"
-                />
-              </label>
-              <label className="field-label">
-                Patterns{" "}
-                <span className="font-normal text-slate-400">(optional)</span>
-                <input
-                  name="patterns"
-                  defaultValue={editing.patterns
-                    .map((pattern) => pattern.name)
-                    .join(", ")}
-                  className="field-control"
                 />
               </label>
               <label className="field-label">
@@ -770,7 +739,8 @@ export function ProblemLibrary() {
                   className="field-control resize-y font-mono text-sm"
                 />
                 <span className="mt-2 block text-xs font-normal text-slate-400">
-                  Saved on this problem so it remains available on future attempts.
+                  Saved on this problem so it remains available on future
+                  attempts.
                 </span>
               </label>
               <button

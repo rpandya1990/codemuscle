@@ -15,7 +15,7 @@ CodeMuscle is a private, open-source coding interview revision tracker that help
 - Calculating the next revision date
 - Generating a daily revision queue
 - Explaining why each problem was selected
-- Measuring retention across topics and patterns
+- Measuring retention across topics
 - Importing existing Excel or CSV preparation history
 - Exporting, backing up, restoring, and deleting personal data
 - Optionally using AI for suggestions and summaries
@@ -146,7 +146,6 @@ CodeMuscle's core data is relational:
 - A problem has many attempts.
 - A problem has many topics.
 - A topic belongs to many problems.
-- A problem may have many patterns.
 - Scheduling depends on ordered attempt history.
 - Statistics require grouping, filtering, counting, and aggregation.
 - Imports and duplicate handling require uniqueness rules and transactions.
@@ -187,7 +186,6 @@ AI is not part of the deterministic MVP core. Add it only after Milestones 1–7
 Do not use LangGraph for simple classification or summarization calls. Use ordinary typed model calls for:
 
 - Topic suggestions
-- Pattern suggestions
 - Failure-reason classification
 - Weekly summary generation
 
@@ -439,17 +437,6 @@ Fields:
 
 A problem may have multiple topics.
 
-### 7.3 Pattern
-
-Fields:
-
-- `id`
-- `name`
-- `normalized_name`
-- `created_at`
-
-A problem may have multiple patterns. Patterns are optional in v1.
-
 ### 7.4 Attempt
 
 Every practice event must create a new immutable attempt row.
@@ -520,9 +507,7 @@ Use UUID primary keys.
 ```text
 problems
 topics
-patterns
 problem_topics
-problem_patterns
 attempts
 import_jobs
 import_rows
@@ -541,8 +526,6 @@ problems 1 --- N attempts
 problems N --- N topics
   through problem_topics
 
-problems N --- N patterns
-  through problem_patterns
 
 queue_sessions 1 --- N queue_items
 queue_items N --- 1 problems
@@ -553,7 +536,6 @@ import_jobs 1 --- N import_rows
 ### 8.3 Important constraints and indexes
 
 - Unique index on `topics.normalized_name`
-- Unique index on `patterns.normalized_name`
 - Index on `problems.next_revision_date`
 - Index on `problems.current_mastery_state`
 - Index on `problems.archived_at`
@@ -827,7 +809,6 @@ Do not use AI for the status itself. AI may later explain or summarize determini
 - Difficulty
 - Notes
 - Topic
-- Pattern
 - Solved First Time
 - Last Revised or Solved Date
 - Number of Revisions
@@ -890,7 +871,6 @@ Export should include:
 
 - Problems
 - Topics
-- Patterns
 - Attempt history
 - Current summaries
 - Queue history where appropriate
@@ -960,7 +940,6 @@ GET    /api/v1/problems/duplicates
 Supported filters should include:
 
 - Topic
-- Pattern
 - Difficulty
 - Mastery state
 - Due status
@@ -1001,7 +980,6 @@ POST   /api/v1/queues/{queue_id}/items/{item_id}/complete
 ```http
 GET /api/v1/statistics/dashboard
 GET /api/v1/statistics/topics
-GET /api/v1/statistics/patterns
 GET /api/v1/statistics/trends
 GET /api/v1/statistics/weak-areas
 ```
@@ -1093,7 +1071,7 @@ Show:
 Show:
 
 - Problem information
-- Topics and patterns
+- Topics
 - Current mastery
 - Next revision date
 - Whether the date is calculated or overridden
@@ -1106,7 +1084,6 @@ Show:
 Show:
 
 - Topic statistics
-- Pattern statistics
 - Practice trends
 - Weak and neglected areas
 - Explanations for classifications
@@ -1260,7 +1237,6 @@ Critical Playwright flows:
 Maintain a small fictional evaluation dataset for:
 
 - Topic suggestions
-- Pattern suggestions
 - Failure-reason classification
 - Weekly summaries
 
@@ -1375,7 +1351,7 @@ Deliver:
 - Workspace selection
 - Settings
 - Problem model
-- Topic and pattern models
+- Topic models
 - Attempt model
 - Migrations
 - Backup/export foundations
@@ -1387,7 +1363,7 @@ Deliver:
 - Manual problem creation
 - Edit
 - Archive and restore
-- Multiple topics and patterns
+- Multiple topics
 - Search and filters
 - Duplicate warnings
 
@@ -1443,7 +1419,6 @@ Deliver:
 
 - Dashboard
 - Topic statistics
-- Pattern statistics
 - Problem history
 - Practice trends
 - Weak, neglected, improving, and stable detection
@@ -1464,7 +1439,6 @@ Deliver:
 - AI-disabled default
 - Ollama adapter
 - Topic suggestions
-- Pattern suggestions
 - Failure-note analysis
 - Weekly summary
 - Approval workflow
@@ -1560,7 +1534,7 @@ CodeMuscle v1 is complete when a new user can:
 6. Import Excel or CSV data.
 7. Review mappings, invalid rows, and possible duplicates.
 8. Preserve supported legacy summary data.
-9. Assign multiple topics and patterns.
+9. Assign multiple topics.
 10. Record an attempt.
 11. View complete attempt history.
 12. Receive a deterministic next revision date.

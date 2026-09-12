@@ -1,5 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+
+import { fetchTrends } from "../lib/statistics";
 
 import StatisticsPage from "../app/statistics/page";
 
@@ -16,7 +18,17 @@ vi.mock("../lib/statistics", () => ({
       status_reasons: ["Independent success rate is below 50%"],
     },
   ]),
-  fetchPatternStatistics: vi.fn().mockResolvedValue([]),
+  fetchTopicTotals: vi
+    .fn()
+    .mockResolvedValue({
+      id: "total",
+      name: "All topics",
+      total_problems: 4,
+      total_attempts: 5,
+      independent_success_rate: 0.4,
+      failed_attempt_rate: 0.4,
+      status_reasons: [],
+    }),
   fetchTrends: vi.fn().mockResolvedValue({
     points: [
       {
@@ -33,6 +45,15 @@ describe("StatisticsPage", () => {
   it("shows deterministic area classifications and trends", async () => {
     render(<StatisticsPage />);
     expect(await screen.findByText("Graphs")).toBeVisible();
+    expect(screen.getByText("All topics")).toBeVisible();
+    fireEvent.change(screen.getByLabelText("Time range"), {
+      target: { value: "26" },
+    });
+    await waitFor(() => expect(fetchTrends).toHaveBeenLastCalledWith(26));
+    fireEvent.change(screen.getByLabelText("Time range"), {
+      target: { value: "0" },
+    });
+    await waitFor(() => expect(fetchTrends).toHaveBeenLastCalledWith(0));
     expect(screen.getByText("WEAK")).toBeVisible();
     expect(
       screen.getByText("Independent success rate is below 50%"),

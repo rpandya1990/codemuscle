@@ -13,7 +13,7 @@ from codemuscle.application.scheduling.schemas import ScheduleOverrideRequest
 from codemuscle.domain.enums import Difficulty
 from codemuscle.domain.exceptions import ProblemNotFoundError
 from codemuscle.infrastructure.database.base import Base
-from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic  # noqa: F401
+from codemuscle.infrastructure.database.models import Attempt, Problem, Topic  # noqa: F401
 
 
 @pytest.fixture
@@ -33,7 +33,6 @@ def test_create_update_filter_archive_and_restore_problem(session: Session) -> N
             difficulty=Difficulty.EASY,
             solution="def two_sum(nums, target):\n    return []",
             topics=["Array", "Hash Table", "array"],
-            patterns=["Lookup"],
         )
     )
 

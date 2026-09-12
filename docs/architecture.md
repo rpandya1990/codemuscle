@@ -109,7 +109,7 @@ sequenceDiagram
     W-->>U: Updated UI or error
 ```
 
-- **Library:** UI → Problems API → `ProblemService` → normalized problems/topics/patterns.
+- **Library:** UI → Problems API → `ProblemService` → normalized problems/topics.
 - **Import:** file → private workspace copy → intermediate rows → preview/duplicate review → commit.
 - **Attempt:** input → `AttemptService` → scheduling policy → immutable attempt and problem summary.
 - **Queue:** request → `QueueService` → scoring/time-fit policy → persisted items and explanations.

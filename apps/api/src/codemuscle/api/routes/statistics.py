@@ -25,14 +25,9 @@ def topic_statistics(session: DatabaseSession) -> list[AreaStatistics]:
     return StatisticsService(session).topics()
 
 
-@router.get("/patterns", response_model=list[AreaStatistics])
-def pattern_statistics(session: DatabaseSession) -> list[AreaStatistics]:
-    return StatisticsService(session).patterns()
-
-
 @router.get("/trends", response_model=TrendsResponse)
 def trends(
-    session: DatabaseSession, weeks: Annotated[int, Query(ge=1, le=52)] = 8
+    session: DatabaseSession, weeks: Annotated[int, Query(ge=0, le=52)] = 8
 ) -> TrendsResponse:
     return StatisticsService(session).trends(weeks)
 
@@ -40,3 +35,8 @@ def trends(
 @router.get("/weak-areas", response_model=list[AreaStatistics])
 def weak_areas(session: DatabaseSession) -> list[AreaStatistics]:
     return StatisticsService(session).weak_areas()
+
+
+@router.get("/topics/total", response_model=AreaStatistics)
+def topic_totals(session: DatabaseSession) -> AreaStatistics:
+    return StatisticsService(session).topic_totals()

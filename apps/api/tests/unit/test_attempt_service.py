@@ -11,7 +11,7 @@ from codemuscle.application.problems.schemas import ProblemCreate
 from codemuscle.application.problems.service import ProblemService
 from codemuscle.domain.enums import AttemptOutcome, MasteryState
 from codemuscle.infrastructure.database.base import Base
-from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic  # noqa: F401
+from codemuscle.infrastructure.database.models import Attempt, Problem, Topic  # noqa: F401
 
 
 @pytest.fixture

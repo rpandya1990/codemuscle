@@ -126,7 +126,7 @@ marks the queue item; recording the actual attempt remains a separate explicit a
 ## Problem lifecycle — implemented
 
 1. User creates a problem; title is required and link is optional.
-2. Names are normalized and topic/pattern rows are reused case-insensitively.
+2. Names are normalized and topic rows are reused case-insensitively.
 3. Duplicate lookup checks normalized URL, platform identifier, exact title, then fuzzy title.
 4. Edits update metadata; attempts remain immutable.
 5. Archive sets `archived_at`, excluding the problem from normal lists and queues.
@@ -158,7 +158,7 @@ classification thresholds are:
   percentage points over the older half of attempts.
 - `STABLE`: none of the above.
 
-Topic and pattern results include explanations, due/overdue counts, mastery distribution, and recent
+Topic results include explanations, due/overdue counts, mastery distribution, and recent
 trend. Dashboard practice-this-week counts distinct problems attempted since Monday. Trend endpoints
 return explicit zero-value weeks so charts do not imply missing data.
 

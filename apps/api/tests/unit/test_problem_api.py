@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from codemuscle.infrastructure.database.base import Base
-from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic  # noqa: F401
+from codemuscle.infrastructure.database.models import Attempt, Problem, Topic  # noqa: F401
 from codemuscle.infrastructure.database.session import get_session
 from codemuscle.main import app
 

@@ -3,7 +3,6 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 from difflib import SequenceMatcher
-from typing import TypeVar
 
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session, selectinload
@@ -25,9 +24,7 @@ from codemuscle.application.problems.schemas import (
 from codemuscle.application.scheduling.schemas import ScheduleOverrideRequest
 from codemuscle.domain.enums import Difficulty, MasteryState
 from codemuscle.domain.exceptions import ProblemNotFoundError
-from codemuscle.infrastructure.database.models.problem import Pattern, Problem, Topic
-
-NamedModel = TypeVar("NamedModel", Topic, Pattern)
+from codemuscle.infrastructure.database.models.problem import Problem, Topic
 
 
 class ProblemService:
@@ -60,7 +57,6 @@ class ProblemService:
             import_job_id=import_job_id,
             legacy_import_metadata=legacy_import_metadata,
             topics=self._resolve_names(Topic, data.topics),
-            patterns=self._resolve_names(Pattern, data.patterns),
         )
         self.session.add(problem)
         self.session.flush()
@@ -74,7 +70,7 @@ class ProblemService:
 
     def update(self, problem_id: uuid.UUID, data: ProblemUpdate) -> ProblemResponse:
         problem = self._get_model(problem_id)
-        values = data.model_dump(exclude_unset=True, exclude={"topics", "patterns"})
+        values = data.model_dump(exclude_unset=True, exclude={"topics"})
         if "url" in values:
             url = str(values["url"]) if values["url"] else None
             values["url"] = url
@@ -85,8 +81,6 @@ class ProblemService:
             setattr(problem, field, value)
         if data.topics is not None:
             problem.topics = self._resolve_names(Topic, data.topics)
-        if data.patterns is not None:
-            problem.patterns = self._resolve_names(Pattern, data.patterns)
         self.session.commit()
         return self.get(problem_id)
 
@@ -123,7 +117,6 @@ class ProblemService:
         *,
         search: str | None = None,
         topic_id: uuid.UUID | None = None,
-        pattern_id: uuid.UUID | None = None,
         difficulty: Difficulty | None = None,
         mastery_state: MasteryState | None = None,
         platform: str | None = None,
@@ -139,8 +132,6 @@ class ProblemService:
             )
         if topic_id:
             query = query.where(Problem.topics.any(Topic.id == topic_id))
-        if pattern_id:
-            query = query.where(Problem.patterns.any(Pattern.id == pattern_id))
         if difficulty:
             query = query.where(Problem.difficulty == difficulty)
         if mastery_state:
@@ -152,7 +143,7 @@ class ProblemService:
         )
         total = self.session.scalar(select(func.count()).select_from(query.subquery())) or 0
         items = self.session.scalars(
-            query.options(selectinload(Problem.topics), selectinload(Problem.patterns))
+            query.options(selectinload(Problem.topics))
             .order_by(Problem.created_at.desc(), Problem.id)
             .offset((page - 1) * page_size)
             .limit(page_size)
@@ -227,10 +218,10 @@ class ProblemService:
         return problem
 
     def _base_query(self) -> Select[tuple[Problem]]:
-        return select(Problem).options(selectinload(Problem.topics), selectinload(Problem.patterns))
+        return select(Problem).options(selectinload(Problem.topics))
 
-    def _resolve_names(self, model: type[NamedModel], names: list[str]) -> list[NamedModel]:
-        resolved: list[NamedModel] = []
+    def _resolve_names(self, model: type[Topic], names: list[str]) -> list[Topic]:
+        resolved: list[Topic] = []
         seen: set[str] = set()
         for name in names:
             normalized = normalize_name(name)

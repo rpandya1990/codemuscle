@@ -26,7 +26,6 @@ class ProblemCreate(BaseModel):
     priority: int = Field(default=3, ge=1, le=5)
     estimated_duration_minutes: int | None = Field(default=None, gt=0, le=1440)
     topics: list[str] = Field(default_factory=list, max_length=30)
-    patterns: list[str] = Field(default_factory=list, max_length=30)
 
 
 class ProblemUpdate(BaseModel):
@@ -42,7 +41,6 @@ class ProblemUpdate(BaseModel):
     priority: int | None = Field(default=None, ge=1, le=5)
     estimated_duration_minutes: int | None = Field(default=None, gt=0, le=1440)
     topics: list[str] | None = Field(default=None, max_length=30)
-    patterns: list[str] | None = Field(default=None, max_length=30)
 
 
 class ProblemResponse(BaseModel):
@@ -68,7 +66,6 @@ class ProblemResponse(BaseModel):
     estimated_duration_minutes: int | None
     archived_at: datetime | None
     topics: list[NamedReference]
-    patterns: list[NamedReference]
     created_at: datetime
     updated_at: datetime
 

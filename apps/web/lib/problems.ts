@@ -22,7 +22,6 @@ export interface Problem {
   current_mastery_state: string;
   archived_at: string | null;
   topics: NamedReference[];
-  patterns: NamedReference[];
 }
 
 export interface ProblemList {
@@ -73,7 +72,6 @@ export async function updateProblem(
     difficulty?: Difficulty;
     notes?: string | null;
     solution?: string | null;
-    patterns?: string[];
   },
 ): Promise<Problem> {
   const response = await fetch(`${API_URL}/problems/${problemId}`, {
@@ -92,7 +90,6 @@ export async function createProblem(input: {
   notes?: string;
   solution?: string;
   topics: string[];
-  patterns: string[];
 }): Promise<Problem> {
   const response = await fetch(`${API_URL}/problems`, {
     method: "POST",

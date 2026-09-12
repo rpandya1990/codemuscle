@@ -33,13 +33,6 @@ problem_topics = Table(
     Column("topic_id", ForeignKey("topics.id", ondelete="CASCADE"), primary_key=True),
 )
 
-problem_patterns = Table(
-    "problem_patterns",
-    Base.metadata,
-    Column("problem_id", ForeignKey("problems.id", ondelete="CASCADE"), primary_key=True),
-    Column("pattern_id", ForeignKey("patterns.id", ondelete="CASCADE"), primary_key=True),
-)
-
 
 class Problem(TimestampMixin, Base):
     __tablename__ = "problems"
@@ -85,9 +78,6 @@ class Problem(TimestampMixin, Base):
     topics: Mapped[list["Topic"]] = relationship(
         secondary=problem_topics, back_populates="problems"
     )
-    patterns: Mapped[list["Pattern"]] = relationship(
-        secondary=problem_patterns, back_populates="problems"
-    )
     attempts: Mapped[list["Attempt"]] = relationship(
         back_populates="problem", cascade="all, delete-orphan", order_by="Attempt.attempted_at"
     )
@@ -104,18 +94,4 @@ class Topic(Base):
     )
     problems: Mapped[list[Problem]] = relationship(
         secondary=problem_topics, back_populates="topics"
-    )
-
-
-class Pattern(Base):
-    __tablename__ = "patterns"
-
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    normalized_name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
-    problems: Mapped[list[Problem]] = relationship(
-        secondary=problem_patterns, back_populates="patterns"
     )

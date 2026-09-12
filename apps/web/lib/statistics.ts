@@ -54,9 +54,10 @@ export const fetchDashboard = () =>
   get<DashboardStatistics>("/statistics/dashboard");
 export const fetchTopicStatistics = () =>
   get<AreaStatistics[]>("/statistics/topics");
-export const fetchPatternStatistics = () =>
-  get<AreaStatistics[]>("/statistics/patterns");
 export const fetchWeakAreas = () =>
   get<AreaStatistics[]>("/statistics/weak-areas");
 export const fetchTrends = (weeks = 8) =>
   get<{ points: TrendPoint[] }>(`/statistics/trends?weeks=${weeks}`);
+
+export const fetchTopicTotals = () =>
+  get<AreaStatistics>("/statistics/topics/total");

@@ -10,7 +10,7 @@ from codemuscle.application.queues.schemas import QueueGenerationRequest, QueueI
 from codemuscle.application.queues.service import QueueService
 from codemuscle.domain.enums import Difficulty
 from codemuscle.infrastructure.database.base import Base
-from codemuscle.infrastructure.database.models import Attempt, Pattern, Problem, Topic  # noqa: F401
+from codemuscle.infrastructure.database.models import Attempt, Problem, Topic  # noqa: F401
 
 
 @pytest.fixture

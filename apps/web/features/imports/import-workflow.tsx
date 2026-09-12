@@ -17,7 +17,6 @@ const fields = [
   ["difficulty", "Difficulty"],
   ["notes", "Notes"],
   ["topic", "Topic"],
-  ["pattern", "Pattern"],
   ["last_revised_date", "Last revised date"],
   ["revision_count", "Revision count"],
   ["successful_streak", "Successful streak"],
