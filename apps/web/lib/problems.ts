@@ -72,6 +72,7 @@ export async function updateProblem(
     difficulty?: Difficulty;
     notes?: string | null;
     solution?: string | null;
+    topics?: string[];
   },
 ): Promise<Problem> {
   const response = await fetch(`${API_URL}/problems/${problemId}`, {

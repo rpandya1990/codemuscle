@@ -156,6 +156,10 @@ export function ProblemLibrary() {
         difficulty: String(form.get("difficulty")) as Difficulty,
         notes: String(form.get("notes") ?? "").trim() || null,
         solution: String(form.get("solution") ?? "").trim() || null,
+        topics: String(form.get("topics") ?? "")
+          .split(",")
+          .map((topic) => topic.trim())
+          .filter(Boolean),
       });
       const revisionDate = String(form.get("next_revision_date") ?? "");
       if (revisionDate && revisionDate !== editing.next_revision_date) {
@@ -163,6 +167,11 @@ export function ProblemLibrary() {
       }
       setEditing(null);
       await load();
+      void fetchTopics()
+        .then(setTopics)
+        .catch(() =>
+          setError("Problem saved, but topics could not be refreshed."),
+        );
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -599,6 +608,20 @@ export function ProblemLibrary() {
                   placeholder="Paste your working code"
                   className="field-control resize-y font-mono text-sm"
                 />
+              </label>
+              <label className="field-label">
+                Topics
+                <input
+                  name="topics"
+                  defaultValue={editing.topics
+                    .map((topic) => topic.name)
+                    .join(", ")}
+                  placeholder="Arrays, Hash Table"
+                  className="field-control"
+                />
+                <span className="mt-2 block text-xs font-normal text-slate-400">
+                  Separate multiple topics with commas.
+                </span>
               </label>
               <label className="field-label">
                 Next revision date

@@ -1,15 +1,16 @@
 import {
+  cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
   within,
 } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import ProblemsPage from "../app/problems/page";
 import { createAttempt } from "../lib/attempts";
-import { fetchProblems } from "../lib/problems";
+import { fetchProblems, fetchTopics, updateProblem } from "../lib/problems";
 
 vi.mock("../lib/problems", () => ({
   fetchProblems: vi
@@ -33,6 +34,7 @@ vi.mock("../lib/attempts", () => ({
 }));
 
 describe("ProblemsPage", () => {
+  afterEach(cleanup);
   it("renders library controls", async () => {
     render(<ProblemsPage />);
     expect(
@@ -202,6 +204,67 @@ describe("ProblemsPage", () => {
         name: "No problem link available for Problem without link",
       }),
     ).toHaveClass("text-slate-300");
+  });
+
+  it.each([
+    [" Graphs, , Dynamic Programming ", ["Graphs", "Dynamic Programming"]],
+    ["", []],
+  ])("saves edited topics from %j", async (input, expectedTopics) => {
+    vi.mocked(fetchProblems).mockResolvedValueOnce({
+      items: [
+        {
+          id: "topic-edit",
+          title: "Topic editing problem",
+          url: null,
+          platform: null,
+          difficulty: "EASY",
+          notes: null,
+          solution: null,
+          priority: 3,
+          total_attempts: 0,
+          successful_revision_streak: 0,
+          next_revision_date: null,
+          calculated_next_revision_date: null,
+          next_revision_overridden: false,
+          current_mastery_state: "NEW",
+          archived_at: null,
+          topics: [
+            { id: "arrays", name: "Arrays" },
+            { id: "hash-table", name: "Hash Table" },
+          ],
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 5000,
+    });
+    render(<ProblemsPage />);
+    const card = (await screen.findByText("Topic editing problem")).closest(
+      "li",
+    );
+    fireEvent.click(
+      within(card as HTMLElement).getByRole("button", { name: "Edit" }),
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Edit problem" });
+    const topics = within(dialog).getByRole("textbox", { name: /Topics/ });
+    expect(topics).toHaveValue("Arrays, Hash Table");
+    fireEvent.change(topics, { target: { value: input } });
+    const topicFetches = vi.mocked(fetchTopics).mock.calls.length;
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Save changes" }),
+    );
+    await waitFor(() =>
+      expect(updateProblem).toHaveBeenLastCalledWith(
+        "topic-edit",
+        expect.objectContaining({ topics: expectedTopics }),
+      ),
+    );
+    await waitFor(() => expect(dialog).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(vi.mocked(fetchTopics).mock.calls.length).toBeGreaterThan(
+        topicFetches,
+      ),
+    );
   });
 
   it("closes the attempt dialog after a successful submission", async () => {
